@@ -39,47 +39,54 @@ def go(num_pages_to_crawl, course_map_filename, index_filename):
 
     starting_url = "http://www.nationalmuseumofmexicanart.org/content/exhibitions"
     limiting_domain = "nationalmuseumofmexicanart.org/exhibits"
+    LEN_LIMIT = len(limiting_domain)
 
     index = {}
-    visited = []
+ #   visited = []
  #   count = 0
 
-    urls_queue = queue.Queue()
-    urls_queue.put(starting_url)
+ #   urls_queue = queue.Queue()
+  #  urls_queue.put(starting_url)
 
-    urls_set = set([starting_url])
+   # urls_set = set([starting_url])
+    urls_list = []
 
-    traverse_links(urls_queue, urls_set, visited, limiting_domain)
+    traverse_links(starting_url, urls_list, limiting_domain)
  #   make_csv(index, index_filename)
 
 
 
-def traverse_links(urls_queue, urls_set, visited, limiting_domain):
-    url = urls_queue.get()
-    urls_set.remove(url)
-    visited.append(url)
+def traverse_links(starting_url, urls_list, limiting_domain):
+ #   url = urls_queue.get()
+  #  urls_set.remove(url)
+#    visited.append(url)
     
-    request = get_request(url)
+    request = get_request(starting_url)
     string = read_request(request)
     soup = bs4.BeautifulSoup(string, 'html5lib')
     
     all_urls = soup.find_all('a', href = True)
     for each_url in all_urls:
-        if each_url not in visited:
-            if each_url not in urls_set:
-                if is_exhibit(each_url, limiting_domain):
-                    urls_queue.put(each_url)
-                    urls_set.add(each_url)
+        each_url = each_url['href']
+        if is_exhibit(each_url, limiting_domain):
+            urls_list.append(each_url)
 
     # visit exhibit page and find info on it
-    index_exhibit(soup, index)
+    for each_url in urls_list:
+        exhibit_request = get_request(each_url)
+        exhibit_string = read_request(exhibit_request)
+        exhibit_soup = bs4.BeautifulSoup(string, 'html5lib')
+        index_exhibit(exhibit_soup, index)
+    
+    return index
 
 def index_exhibit(soup, index):
     contains_exhibit_name = soup.find_all('title')
-    contains_exhibit_name = contains_exhibit_name.split(' | ')
+    contains_exhibit_name = contains_exhibit_name[0].string.split(' | ')
     exhibit_name = contains_exhibit_name[0]
+    museum_name = contains_exhibit_name[1]
     if exhibit_name not in index:
-        index[exhibit_name] = []
+        index[exhibit_name] = {'museum': museum_name, 'contents': []}
 
     all_list = soup.find_all('div', class_ = 'field-type-text-with-summary')
     for item in all_list:
@@ -87,15 +94,16 @@ def index_exhibit(soup, index):
             for word in item.string.split(' '):
                 new_word = is_word(word.lower())
                 if new_word:
-                    if new_word not in index[exhibit_name]:
-                        index[exhibit_name].append(new_word)
+                    if new_word not in index[exhibit_name]['contents']:
+                        index[exhibit_name]['contents'].append(new_word)
 
-def is_exhibit(url_to_check, limiting_domain):
+
+def is_exhibit(url, limiting_domain):
     if not url:
         return False
 
-    if isinstance(url, bytes):
-        url = url.decode(encoding='UTF-8')
+ #   if isinstance(url, bytes):
+  #      url = url.decode(encoding='UTF-8')
 
     if "mailto:" in url:
         return False
@@ -107,8 +115,10 @@ def is_exhibit(url_to_check, limiting_domain):
     if parsed_url.scheme != "http" and parsed_url.scheme != "https":
         return False
 
-    if parsed_url.netloc != 'nationalmuseumofmexicanart.org':  # generalize?
-        return False
+    if parsed_url.netloc == 'nationalmuseumofmexicanart.org' or \
+    parsed_url.netloc == 'www.nationalmuseumofmexicanart.org':  # generalize?
+        if parsed_url.path[:8] == '/exhibit':
+            return True
 
     if parsed_url.fragment:
         return False
@@ -116,11 +126,11 @@ def is_exhibit(url_to_check, limiting_domain):
     if parsed_url.query:
         return False
 
-    if parsed_url.path[:8] != '/exhibit': # generalize? use limiting_domain
-        return False
+ #   if parsed_url.path[:8] != '/exhibit': # generalize? use limiting_domain
+  #      return False
 
-    else:
-        return True
+  #  else:
+   #     return True
 
 
 
@@ -218,7 +228,7 @@ def is_absolute_url(url):
 
 
 
-
+'''
 
 if __name__ == "__main__":
     usage = "python3 crawl.py <number of pages to crawl>"
@@ -242,4 +252,4 @@ if __name__ == "__main__":
 
 
 
-
+'''

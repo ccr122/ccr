@@ -66,10 +66,18 @@ def traverse_links(starting_url, urls_list, limiting_domain):
     soup = bs4.BeautifulSoup(string, 'html5lib')
     
     all_urls = soup.find_all('a', href = True)
+    exp = re.compile('[a-zA-Z\s:-]+')
     for each_url in all_urls:
-        each_url = each_url['href']
-        if is_exhibit(each_url, limiting_domain):
-            urls_list.append(each_url)
+        if is_exhibit(each_url['href'], limiting_domain):
+            urls_list.append(each_url['href'])
+            for ss in each_url.stripped_strings:
+                if re.match(exp, ss):
+                    exhibit_name = re.match(exp, ss).group()
+                    if exhibit_name not in index:
+                        index[exhibit_name] = {'museum': 'National Museum of Mexican Art', \
+                        'contents': []}
+   
+    # find dates for each exhibit
 
     # visit exhibit page and find info on it
     for each_url in urls_list:
@@ -81,16 +89,16 @@ def traverse_links(starting_url, urls_list, limiting_domain):
     return index
 
 def index_exhibit(soup, index):
-    contains_exhibit_name = soup.find_all('title')
-    contains_exhibit_name = contains_exhibit_name[0].string.split(' | ')
-    exhibit_name = contains_exhibit_name[0]
-    museum_name = contains_exhibit_name[1]
-    if exhibit_name not in index:
-        index[exhibit_name] = {'museum': museum_name, 'contents': []}
+#    contains_exhibit_name = soup.find_all('title')
+ #   contains_exhibit_name = contains_exhibit_name[0].string.split(' | ')
+  #  exhibit_name = contains_exhibit_name[0]
+   # museum_name = contains_exhibit_name[1]
+    #if exhibit_name not in index:
+     #   index[exhibit_name] = {'museum': museum_name, 'contents': []}
 
     all_list = soup.find_all('div', class_ = 'field-type-text-with-summary')
     for item in all_list:
-        if item.string:
+        if item.string:  # need to get string somehow
             for word in item.string.split(' '):
                 new_word = is_word(word.lower())
                 if new_word:
@@ -101,9 +109,6 @@ def index_exhibit(soup, index):
 def is_exhibit(url, limiting_domain):
     if not url:
         return False
-
- #   if isinstance(url, bytes):
-  #      url = url.decode(encoding='UTF-8')
 
     if "mailto:" in url:
         return False
@@ -125,14 +130,6 @@ def is_exhibit(url, limiting_domain):
 
     if parsed_url.query:
         return False
-
- #   if parsed_url.path[:8] != '/exhibit': # generalize? use limiting_domain
-  #      return False
-
-  #  else:
-   #     return True
-
-
 
 
 

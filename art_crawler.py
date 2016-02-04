@@ -13,13 +13,14 @@ import requests
    #                 'on',  'or',  's',  'sequence',  'so',  'social',  'students',
     #                'such',  'that',  'the',  'their',  'this',  'through',  'to',
      #               'topics',  'units', 'we', 'were', 'which', 'will', 'with', 'yet'])
+
 EXHIBIT_LEN = 2
 DEYOUNG = '005'
 LEGION = '006'
 
 ### YOUR FUNCTIONS HERE
 
-def go(starting_urls, museum_id):
+def go(starting_urls, museum_id, limiting_domain):
     index = {museum_id: {}}
     to_visit = []
 
@@ -35,7 +36,7 @@ def go(starting_urls, museum_id):
                 if url_match != '/exhibitions/current' and \
                 url_match != '/exhibitions/upcoming' and \
                 url_match != '/exhibitions/archive':
-                    abs_url = make_absolute_url(s, url)
+                    abs_url = make_absolute_url(limiting_domain, url)
                     if abs_url not in to_visit:
                         to_visit.append(abs_url)
     count = 1
@@ -43,29 +44,40 @@ def go(starting_urls, museum_id):
         rex = requests.get(ex)
         exsoup = bs4.BeautifulSoup(rex.text, 'html5lib')
         exhibit_id = make_exhibit_id(count)
-        title_text = exsoup.h1.string  # why is it getting the h1 of soup and not exsoup?
-        start, end = find_date(exsoup)  # not working?
-        description = find_description(exsoup)  # not working?
-        index[museum_id][exhibit_id] = {'title': title_text, 'desc': '', \
-        'date': []}
+        title_text = exsoup.h1.string
+        dates = find_date(exsoup)
+        description = find_description(exsoup)
+        index[museum_id][exhibit_id] = {'title': title_text, 'desc': description, \
+        'date': dates}
         count += 1
-    return to_visit, index
+    return index
 
 
 def find_description(soup):
-    contains_desc = soup.find_all('div', class_ = 'field-name-body')[0].find_all('p')
-    desc_string = ''
-    for d in contains_desc:
-        if d.get_text():
-            desc_string += d.get_text()
-        else:
-            break
+    if soup.find('meta', attrs = {'name': 'description'}):
+        desc_string = soup.find('meta', attrs = {'name': 'description'})['content']
+    elif soup.find('div', class_ = 'panel-pane pane-custom pane-3'):
+        contains_desc = soup.find('div', class_ = 'panel-pane pane-custom pane-3').find_all('p')
+        desc_string = ''
+        for d in contains_desc:
+            if d.get_text():
+                desc_string += d.get_text()
+            else:
+                break
     return desc_string
 
+
 def find_date(soup):
-    start_date = soup.find('div', class_ = 'date-display-start').string  # why not working?
-    end_date = soup.find('div', class_ = 'date-display-end').string  # why not working?
-    return start_date, end_date
+    if soup.find('span', class_ = 'date-display-start'):
+        start_date = soup.find('span', class_ = 'date-display-start').string
+        end_date = soup.find('span', class_ = 'date-display-end').string
+        return [start_date, end_date]
+    elif soup.find('div', id = 'dates'):
+        start_end_date = soup.find('div', id = 'dates').find('h3').string
+        return start_end_date
+    elif soup.find('div', id = 'mainTitle'):
+        start_end_date = soup.find('div', id = 'mainTitle').find('p').string
+        return start_end_date
 
 def make_exhibit_id(count):
     excount = str(count)
@@ -74,15 +86,19 @@ def make_exhibit_id(count):
     ex_id = DEYOUNG + excount
     return ex_id
 
-def make_absolute_url(page_url, relative_url):
-    abs_url = page_url + relative_url
+def make_absolute_url(limiting_domain, relative_url):
+    abs_url = limiting_domain + relative_url
     return abs_url
 
 if __name__ == "__main__":
     starting_deyoung = ["http://deyoung.famsf.org/exhibitions/current", \
     "http://deyoung.famsf.org/exhibitions/upcoming"]
+    limiting_deyoung = "http://deyoung.famsf.org"
     starting_legion = ["http://legionofhonor.famsf.org/exhibitions/current", \
     "http://legionofhonor.famsf.org/exhibitions/upcoming"]
+    limiting_legion = "http://legionofhonor.famsf.org"
     
-    go(starting_deyoung, DEYOUNG)
-    go(starting_legion, LEGION)
+    deyoung = go(starting_deyoung, DEYOUNG, limiting_deyoung)
+    legion = go(starting_legion, LEGION, limiting_legion)
+
+    print(deyoung, legion)

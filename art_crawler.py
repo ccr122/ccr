@@ -48,7 +48,7 @@ def go(starting_urls, museum_id, limiting_domain):
         dates = find_date(exsoup)
         description = find_description(exsoup)
         index[museum_id][exhibit_id] = {'title': title_text, 'desc': description, \
-        'date': dates}
+                                        'date': dates, 'url': ex}
         count += 1
     return index
 

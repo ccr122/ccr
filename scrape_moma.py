@@ -27,7 +27,6 @@ def get_exhibit_info(soup, museum_dict, exhibit_id):
     museum_dict[exhibit_id]['title'] = title
 
     desc_code = soup.find('div', class_="mde-column__section").get_text()
-  #  museum_dict[exhibit_id]['desc'] = desc.strip()
     museum_dict[exhibit_id]['desc'] = desc_code.strip()
 
     date_code = soup.find('h2', class_="page-header__subheading--narrow").get_text()
@@ -42,7 +41,7 @@ def scrape_moma():
     museum_id = '004'
     index = {}
     index[museum_id] = {}
-    exhibit_id = museum_id + '001'
+    exhibit_id = museum_id + '01'
 
     for link in exhibit_urls:
         r = requests.get(link)
@@ -52,3 +51,4 @@ def scrape_moma():
         exhibit_id = '00' + str(int(exhibit_id) + 1)
 
     return index 
+

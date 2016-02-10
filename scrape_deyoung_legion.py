@@ -38,11 +38,12 @@ def go(starting_urls, museum_id, limiting_domain):
 
 
 def find_description(soup):
+    desc_string = ''
     if soup.find('meta', attrs = {'name': 'description'}):
         desc_string = soup.find('meta', attrs = {'name': 'description'})['content']
     elif soup.find('div', class_ = 'panel-pane pane-custom pane-3'):
         contains_desc = soup.find('div', class_ = 'panel-pane pane-custom pane-3').find_all('p')
-        desc_string = ''
+     #   desc_string = ''
         for d in contains_desc:
             if d.get_text():
                 desc_string += d.get_text()

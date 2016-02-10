@@ -1,6 +1,6 @@
 # scrape_met.py
 # usage: run scrape_met.py
-#        scrape_met.py()
+#        scrape_met()
 # returns dictionary
 
 import requests
@@ -29,10 +29,10 @@ def get_exhibit_info(soup, museum_dict, exhibit_id):
     if len(subtitle) != 0:
         title += ": " + subtitle
     museum_dict[exhibit_id]['title'] = title
- #   print("title is " + title)
+#    print("title is " + title)
 
-    desc = soup.find('div', class_="text-box cleared").get_text()
-    museum_dict[exhibit_id]['desc'] = desc.strip()
+    desc_code = soup.find('div', class_="text-box cleared").get_text()
+    museum_dict[exhibit_id]['desc'] = desc_code.strip()
 
     date_code = soup.find('h4', class_="date").get_text()
     date_code = date_code.strip()
@@ -52,7 +52,7 @@ def scrape_met():
 
     index = {}
     index[museum_id] = {}
-    exhibit_id = museum_id + '001'
+    exhibit_id = museum_id + '01'
 
     for link in exhibit_urls:
         r = requests.get(link)

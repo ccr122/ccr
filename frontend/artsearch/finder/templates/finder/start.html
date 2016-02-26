@@ -1,21 +1,22 @@
-
 <html>
 <head>
     <link type="text/css" rel="stylesheet" href="stylesheet.css"/>
 </head>
+
+<body>
 <h2> Exhibit search </h1>
 
-<p>
-	[insert description of what we do here]
-</p>
+<div id="desc">
+	<p>Search for museum exhibits based with a museum search and a keyword search.</p>
+	<p>Check off the museums you would like to search through, and type in some keywords to search by. Your results will be displayed below.</p>
+</div>
 
 <form>
 	{{form}}
 	<input type='submit' Label ='search' value = 'submit'>
 </form>
 
-
-<div>
+<div id="results">
     {% if result != None %}
         <h1>
                 Results: 
@@ -27,5 +28,5 @@
         </ul>
     {% endif %}
 </div>
-
+</body>
 </html>

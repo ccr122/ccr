@@ -1,7 +1,7 @@
 
 <html>
 
-<h1> Exhibit search </h1>
+<h2> Exhibit search </h1>
 
 <p>
 	[insert description of what we do here]
@@ -12,5 +12,18 @@
 	<input type='submit' Label ='search' value = 'submit'>
 </form>
 
+
+<div>
+    {% if result != None %}
+        <h1>
+                Results: 
+        </h1>
+        <ul>
+            {% for (link,result) in result %}
+                <li href={{link}}> {{result}} </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
 
 </html>

@@ -1,80 +1,99 @@
 ex_id,title
-00105,Nothing Personal: Zoe Leonard, Cindy Sherman, Lorna Simpson
-00106,Homegrown:  The School of the  Art Institute in the Permanent Collection
-00111,A Voyage to South America: Andean Art in the Spanish Empire
-00108,Alfred Stieglitz and the 19th Century
-00104,Degas: At the Track, On the Stage
-00115,Van Gogh: In Search Of
-00103,Martin Puryear: Multiple Dimensions
-00112,The City as Image: The 1909 Plan of Chicago
 00102,The New Contemporary
-00110,Kesa: Japanese Buddhist Monks’ Vestments
 00101,Van Gogh's Bedrooms
-00107,Dionysos Unmasked: Ancient Sculpture and Early Prints
-00113,Transitory Beauty: Japanese Fan Prints
-00114,Ursula von Rydingsvard: Bronze Bowl with Lace
-00109,Materials Inside and Out
+00103,Martin Puryear: Multiple Dimensions
+00105,Alfred Stieglitz and the 19th Century
+00114,Dennis Oppenheim: Projections
+00113,As Seen: Exhibitions That Made Architecture and Design History
+00107,Kesa: Japanese Buddhist Monks’ Vestments
+00110,Transitory Beauty: Japanese Fan Prints
+00108,A Voyage to South America: Andean Art in the Spanish Empire
+00112,Van Gogh: In Search Of
+00111,Ursula von Rydingsvard: Bronze Bowl with Lace
+00115, Shakers and Movers: Selections from the Collection of Dr. Thomas and Jan Pavlovic
+00104,Nothing Personal: Zoe Leonard, Cindy Sherman, Lorna Simpson
+00106,Materials Inside and Out
+00109,The City as Image: The 1909 Plan of Chicago
 00203,The Street, the Store, and the Silver Screen: Pop Art from the MCA Collection
-00202,Pop Art Design
-00206,Surrealism: The Conjured Life
-00207,BMO Harris Bank Chicago Works: Diane Simpson
+00204,Ascendant Artists: Kathryn Andrews: Run for President
 00201,MCA DNA: Rafael Ferrer
 00213,MCA DNA: Chicago Conceptual Abstraction, 1986–1995
-00204,Ascendant Artists: Kathryn Andrews: Run for President
-00212,MCA DNA: Warhol and Marisol
-00208,MCA Screen: Phil Collins
-00211,MCA DNA: Alexander Calder
 00210,MCA DNA: Richard Hunt
-00215,MCA DNA: William Kentridge
-00205,MCA Chicago Plaza Project: Alexandre da Cunha
 00209,Johnston Marklee: Grid Is a Grid Is a Grid Is a Grid Is a Grid
+00212,MCA DNA: Warhol and Marisol
+00211,MCA DNA: Alexander Calder
+00207,BMO Harris Bank Chicago Works: Diane Simpson
+00202,Pop Art Design
+00208,MCA Screen: Phil Collins
+00206,Surrealism: The Conjured Life
 00214,MCA DNA: John Cage
-00327,Fabergé from the Matilda Geddings Gray Foundation Collection
-00302,Vigée Le Brun: Woman Artist in Revolutionary France
-00326,Masterpieces of Chinese Painting from the Metropolitan Collection
-00322,Monkey Business: Celebrating the Year of the Monkey
-00304,Celebrating Sax: Instruments and Innovation
-00312,Artistic Furniture of the Gilded Age
-00321,Transformed: Medieval Syrian and Iranian Art in the Early 20th Century
-00323,American Quilts and Folk Art
-00309,Wordplay: Matthias Buchinger's Drawings from the Collection of Ricky Jay
-00306,Reconstructions: Recent Photographs and Video from the Met Collection
-00307,Korea: 100 Years of Collecting at the Met
-00336,Jerusalem 1000–1400: Every People Under Heaven
-00329,The Arts of Nepal and Tibet: Recent Gifts
-00320,Alex Katz at the Met
-00308,The Luxury of Time: European Clocks and Watches
-00311,A New Look at a Van Eyck Masterpiece
-00334,Court and Cosmos: The Great Age of the Seljuqs
-00330,Celebrating the Arts of Japan: The Mary Griggs Burke Collection
-00317,A Passion for Jade: The Heber Bishop Collection
-00319,Chinese Textiles: Ten Centuries of Masterpieces from the Met Collection
-00331,Unfinished: Thoughts Left Visible
-00315,The Power of Prints: The Legacy of William M. Ivins and A. Hyatt Mayor
-00332,Nasreen Mohamedi
-00328,Sol LeWitt: Wall Drawing #370
-00316,Encountering Vishnu: The Lion Avatar in Indian Temple Drama
-00313,Selections from the Collection of Jefferson R. Burdick
-00305,The Aftermath of Conflict: Jo Ractliffe's Photographs of Angola and South Africa
-00303,Design for Eternity: Architectural Models from the Ancient Americas
-00335,Manus x Machina: Fashion in an Age of Technology
-00318,Chinese Lacquer: Treasures from the Irving Collection, 12th–18th Century
-00333,Pergamon and the Hellenistic Kingdoms of the Ancient World
-00310,The World in Play: Luxury Cards, 1430–1540
-00325,New Discoveries: Early Liturgical Textiles from Egypt, 200–400
-00324,Collecting the Arts of Mexico
-00301,Jacqueline de Ribes: The Art of Style
-00314,Asian Art at 100: A History in Photographs
-00505,Bruce Davidson: Gifts to the Collection
-00504,Oscar de la Renta: The Retrospective
-00507,Ed Ruscha and the Great American West
-00503,Printed Stories
-00501,Royal Hawaiian Featherwork: Nā Hulu Ali‘i
+00205,MCA Chicago Plaza Project: Alexandre da Cunha
+00215,MCA DNA: William Kentridge
+00306,The Luxury of Time: European Clocks and Watches
+00323,New Discoveries: Early Liturgical Textiles from Egypt, 200–400
+00326,Sol LeWitt: Wall Drawing #370
+00331,Pergamon and the Hellenistic Kingdoms of the Ancient World
+00312,Asian Art at 100: A History in Photographs
+00309,A New Look at a Van Eyck Masterpiece
+00320,Monkey Business: Celebrating the Year of the Monkey
+00311,Selections from the Collection of Jefferson R. Burdick
+00317,Chinese Textiles: Ten Centuries of Masterpieces from the Met Collection
+00303,The Aftermath of Conflict: Jo Ractliffe's Photographs of Angola and South Africa
+00305,Korea: 100 Years of Collecting at the Met
+00327,The Arts of Nepal and Tibet: Recent Gifts
+00332,Court and Cosmos: The Great Age of the Seljuqs
+00330,Nasreen Mohamedi
+00328,Celebrating the Arts of Japan: The Mary Griggs Burke Collection
+00314,Encountering Vishnu: The Lion Avatar in Indian Temple Drama
+00322,Collecting the Arts of Mexico
+00334,Jerusalem 1000–1400: Every People Under Heaven
+00329,Unfinished: Thoughts Left Visible
+00315,A Passion for Jade: The Heber Bishop Collection
+00307,Wordplay: Matthias Buchinger's Drawings from the Collection of Ricky Jay
+00313,The Power of Prints: The Legacy of William M. Ivins and A. Hyatt Mayor
+00321,American Quilts and Folk Art
+00308,The World in Play: Luxury Cards, 1430–1540
+00324,Masterpieces of Chinese Painting from the Metropolitan Collection
+00310,Artistic Furniture of the Gilded Age
+00302,Design for Eternity: Architectural Models from the Ancient Americas
+00301,Vigée Le Brun: Woman Artist in Revolutionary France
+00316,Chinese Lacquer: Treasures from the Irving Collection, 12th–18th Century
+00304,Reconstructions: Recent Photographs and Video from the Met Collection
+00333,Manus x Machina: Fashion in an Age of Technology
+00318,Alex Katz at the Met
+00325,Fabergé from the Matilda Geddings Gray Foundation Collection
+00319,Transformed: Medieval Syrian and Iranian Art in the Early 20th Century
+00421,Art Lab: Process
+00415,A Japanese Constellation: Toyo Ito, SANAA, and Beyond
+00405,Greater New York
+00404,Endless House: Intersections of Art and Architecture
+00411,Painting & Sculpture I
+00406,Ocean of Images: New Photography 2015
+00414,Projects 102: Neïl Beloufa
+00402,Maria Hassabi: PLASTIC
+00407,Soldier, Spectre, Shaman: The Figure and the Second World War
+00413,Gustav Klimt’s Adele Bloch-Bauer II
+00416,Edgar Degas: A Strange New Beauty
+00401,Marcel Broodthaers: A Retrospective
+00412,The Modern Monument
+00403,Take an Object
+00409,Ernie Gehr: Carnival of Shadows
+00419,Anne Teresa De Keersmaeker: Work/Travail/Arbeid
+00418,BRUCE CONNER: IT’S ALL TRUE
+00408,Scenes for a New Heritage: Contemporary Art from the Collection
+00410,Jackson Pollock: A Collection Survey, 1934–1954
+00420,“The Roof of the Whale”: El Techo de la Ballena and the Venezuelan Avant-Garde, 1961–1969
+00417,From the Collection: 1960–1969
 00502,Between Life and Death: Robert Motherwell's Elegies in Bay Area Collections
-00508,Danny Lyon: Message to the Future 
+00504,Oscar de la Renta: The Retrospective
 00506,Bouquets to Art
+00505,Bruce Davidson: Gifts to the Collection
+00507,Ed Ruscha and the Great American West
+00501,Royal Hawaiian Featherwork: Nā Hulu Ali‘i
+00503,Printed Stories
+00508,Danny Lyon: Message to the Future 
+00601,Pierre Bonnard: Painting Arcadia
 00603,Sublime Beauty: Raphael's "Portrait of a Lady with a Unicorn"
 00602,A Princely Pursuit: The Malcolm D. Gutter Collection of Early Meissen Porcelain
-00605,Wild West: Picturing America's Frontier
 00604,The World in a Book: “The Nuremberg Chronicle” and the Art of German Renaissance Illustration 
-00601,Pierre Bonnard: Painting Arcadia
+00605,Wild West: Picturing America's Frontier

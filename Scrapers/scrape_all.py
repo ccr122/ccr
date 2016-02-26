@@ -1,10 +1,11 @@
 # run all scrape files to get 6 museum indexes
-# create 5 csv files:
-# - exhibit ID to museum ID: 
+# create 6 csv files:
+# - exhibit ID to museum ID: ex_id_to_mus_id.csv
 # - exhibit ID to exhibit description text (unparsed): ex_id_to_ex_desc.csv
 # - exhibit ID to exhibit date: ex_id_to_ex_date.csv
 # - exhibit ID to exhibit title: ex_id_to_ex_title.csv
-# - exhibit ID to exhibit title and description text (parsed)
+# - exhibit ID to description text (parsed): ex_id_to_ex_desc_parsed.csv
+# - exhibit ID to exhibit url: ex_id_to_ex_url.csv
 
 # museum ids:   {ART INSTITUTE OF CHICAGO: 001,
 #                MUSEUM OF CONTEMPORARY ART: 002,
@@ -31,7 +32,7 @@ INDEX_IGNORE = set(['a', 'about', 'affect', 'affects', 'all', 'among',
                     'early', 'effect', 'effects', 
                     'evoke', 'evoked', 'exhibit',
                     'exhibits', 'exhibition', 'exhibitions',
-                    'experience', 'feature', 'features', 'foundation',
+                    'experience', 'feature', 'features',
                     'first', 'for',  'from', 'funding', 'go', 'goes', 
                     'gone', 'had', 'have', 
                     'has', 'he', 'her', 'hers', 
@@ -39,7 +40,7 @@ INDEX_IGNORE = set(['a', 'about', 'affect', 'affects', 'all', 'among',
                     'how', 'i', 'ii', 'iii', 'idea', 'in',  
                     'include', 
                     'institute', 'interpret', 'interpretation', 'into',
-                    'is', 'it', 'just', 'many', 'meaning', 'modern', 'more', 'motif', 
+                    'is', 'it', 'just', 'many', 'meaning', 'more', 'motif', 
                     'museum', 'not', 'of',
                     'on', 'only',  'or', 'other', 'over', 
                     'period', 'piece', 'pieces', 
@@ -60,12 +61,9 @@ INDEX_IGNORE = set(['a', 'about', 'affect', 'affects', 'all', 'among',
 
 def make_csv(indexes, var_of_interest, filename):
     with open(filename, 'w') as f:
-        i = 1
+        line = 'ex_id,' + var_of_interest + '\n'
+        f.write(line)
         for museum in indexes:
-            if i == 1:
-                line = 'ex_id,' + var_of_interest + '\n'
-                f.write(line)
-                i = 2
             for exhibit in museum:
                 var_value = museum[exhibit][var_of_interest]
                 line = '{},{}\n'.format(str(exhibit), str(var_value))
@@ -73,12 +71,9 @@ def make_csv(indexes, var_of_interest, filename):
 
 def make_date_csv(indexes, filename):
     with open(filename, 'w') as f:
-        i = 1
+        line = 'ex_id,date\n'
+        f.write(line)
         for museum in indexes:
-            if i == 1:
-                line = 'ex_id,date\n'
-                f.write(line)
-                i = 2
             for exhibit in museum:
                 rawdate = museum[exhibit]['date']
                 if type(rawdate) != list:
@@ -89,13 +84,9 @@ def make_date_csv(indexes, filename):
 
 def make_parsed_desc_csv(indexes, filename):
     with open(filename, 'w') as f:
-        i = 1
+        line = 'ex_id,word\n'
+        f.write(line)
         for museum in indexes:
-            if i == 1:
-                line = 'ex_id,word\n'
-                f.write(line)
-                i = 2
-                continue
             for exhibit in museum:
                 unparsed = museum[exhibit]['desc']
                 parsed = parse_desc(unparsed)
@@ -105,12 +96,9 @@ def make_parsed_desc_csv(indexes, filename):
 
 def make_ex_mus_id_csv(indexes, filename):
     with open(filename, 'w') as f:
-        i = 1
+        line = 'ex_id,mus_id\n'
+        f.write(line)
         for museum in indexes:
-            if i == 1:
-                line = 'ex_id,mus_id\n'
-                f.write(line)
-                i = 2
             for exhibit in museum:
                 museum_id = exhibit[0:3]
                 line = '{},{}\n'.format(str(exhibit), str(museum_id))
@@ -186,3 +174,4 @@ if __name__ == "__main__":
     make_date_csv(indexes, 'ex_id_to_ex_date.csv')
     make_csv(indexes, 'desc', 'ex_id_to_ex_desc.csv')
     make_ex_mus_id_csv(indexes, 'ex_id_to_mus_id.csv')
+    make_csv(indexes, 'url', 'ex_id_to_ex_url.csv')

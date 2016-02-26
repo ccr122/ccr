@@ -5,7 +5,8 @@ from django import forms
 
 # Create your views here.
 
-MUSEUMS = ['artic','MOMA','MCA']
+MUSEUMS = ['artic','MOMA','MCA','Random museum number 1'] # We should get this list from the sql table
+
 OPTIONS = [(True,m) for m in MUSEUMS]
 
 def start(request):
@@ -16,11 +17,16 @@ def start(request):
 	'''
 	if request.method == 'GET':
 		form = searchform(request.GET)
-		print form
+		if form.is_valid():
+			print '\n'
+			print form.cleaned_data # NEED HELP - SELECTING ! OPTION SELECTS ALL OPTIONS!
 		#fill_filler(form)
-	c = {'form':form}
 
-	return render(request, 'finder/start.html',c)
+	result= None #[('google.com','google'),('facebook.com','facebook')]	
+
+	c = {'form':form, 'result': result}
+	return render(request, 'finder/start.html',c) # NEED HELP WITH HTML (CAN'T CALL ELEMENTS OF TUPLE)
+
 
 
 class searchform( forms.Form  ):
@@ -33,8 +39,9 @@ class searchform( forms.Form  ):
 		required=False)
 
 	museums = forms.MultipleChoiceField(
-		OPTIONS
-		, widget=forms.CheckboxSelectMultiple
+			OPTIONS,
+			widget = forms.CheckboxSelectMultiple,
+			label  = 'Select which museums to search from'
 		)
 
 

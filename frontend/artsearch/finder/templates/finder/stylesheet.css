@@ -1,6 +1,7 @@
-body {
+html, body {
     font-family: Helvetica;
     padding: 70px;
+    background-color: red;
 }
 
 h2 {

@@ -4,7 +4,7 @@
 </head>
 
 <body>
-<h2> Exhibit search </h1>
+<h1> Exhibit search </h1>
 
 <div id="desc">
 	<p>Search for museum exhibits based with a museum search and a keyword search.</p>
@@ -18,9 +18,9 @@
 
 <div id="results">
     {% if result != None %}
-        <h1>
+        <h2>
                 Results: 
-        </h1>
+        </h2>
         <ul>
             {% for (link,result) in result %}
                 <li href={{link}}> {{result}} </li>

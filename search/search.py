@@ -11,7 +11,7 @@ import os.path
 import re
 
 '''
-exhibits = {ex_id: { word in decscription : number of occurance } }
+exhibits = pandas dataframe filtered down by museums
 dim = [ all the words in all descriptions (no duplicates) ]
 comparisons = [ (exhibit1, exhibit2, theta),...]
 
@@ -20,7 +20,6 @@ Also if we have time we should be able to update these data
     without reconstructing everything
 
 '''
-
 ##### Data related: getting and saving files, generating pandas tables
 
 FILE_PATHS = {  'dim'         : 'pickled_dim',
@@ -44,29 +43,37 @@ def make_dim_exhibits(museums):
     dim = set(exhibits.groupby('word').groups.keys())
     return (dim, exhibits)
 
+def make_ex_dict(exhibits):
+    ex_dict = exhibits.groupby('ex_id').groups
+    for x in ex_dict:
+        rows = ex_dict[x]
+        words = [exhibits.loc[ row,'word'] for row in rows]
+        words_dict = {}
+        for w in words:
+            if words_dict.get(w)==None:
+                words_dict[w] = 1
+            else:
+                words_dict[w] += 1
+        ex_dict[x] = words_dict
+    return ex_dict
+
 def build_comparison_table():
     '''
     Makes table of cosine_distance between descriptions
     index and columns are all exhibit ids
     '''
     (dim,exhibits) = make_dim_exhibits(None)
-    comparison = pd.DataFrame(  columns = exhibits.keys(),
-                                index = exhibits.keys())
-                                
-    ex_dict = exhibits.groupby('ex_id')
+    ex_dict = make_ex_dict(exhibits)
+    comparison = pd.DataFrame(  columns = ex_dict.keys(),
+                            index = ex_dict.keys())
     for x in ex_dict:
-        rows = ex_dict[x]
-        words = [exhibits.loc[ row,'word'] for row in rows]
-        ex_dict[x] = words
-    
-    for ex in ex_dict:
         comparison[ex][ex]=0.0
     for (ex1,ex2) in itertools.combinations(ex_dict,2):
-    
         d = cosine_distance(ex_dict[ex1] ,ex_dict[ex2],dim)
         comparison[ex1][ex2] = d
         comparison[ex2][ex1] = d
-        
+    
+    comparison = comparision.rename(columns={c.columns[0]:'ex_id'})
     comparison.to_csv(FILE_PATHS['comparison'])
     
 def update_comparison_table(exhibits,comparison):
@@ -111,13 +118,7 @@ def cosine_distance(words1,words2,dim):
     b = make_vector(words2,dim)
     return spatial.distance.cosine(a,b)
 
-
-
-############## EVERYTHING BEFORE THIS IS BUT HELPER FUNCTIONS
-############## THESE BE THE TRU HEROS BEFORE YE
-
-
-    
+###### Search tools
 
 def find_similar_exhibits(museum_id, num_results):
     '''
@@ -130,41 +131,58 @@ def find_similar_exhibits(museum_id, num_results):
 def key_word_search(key_words,dim,exhibits):
     '''
     takes a dict {key word: number of times keyword occured}
-    returns list of num_results most similar exhibits
+    returns list of exhibits sorted by similarity (no orthogonal results)
     WARNING - I think we suffer from floating point error as some queeries
             return lots of 1s
     '''
+    ex_dict = make_ex_dict(exhibits)
     dim |= set(key_words.keys())
-    
-    differences = [( x, cosine_distance(key_words,exhibits[x],dim) )
-                    for x in exhibits]
+    differences = [( x, cosine_distance(key_words,ex_dict[x],dim) )
+                    for x in ex_dict]
     differences.sort(key=lambda x: x[1])
-    return [d for d in differences if d[1]!=1] #filter out orthogonal seraches
-    
-    
-def search(args):
-    '''
-    Assuming we can get args_from_ui as a dict { 'field', ui input }
-    we search things and return results
-    '''
-    (dim,exhibits)=args['museums']
-    key_words = serachify[args['search_terms']]
-    search_results = key_word_search(key_words,dim,exhibits)
-    
+    return [d[0] for d in differences if d[1]!=1] #filter out orthogonal seraches
 
-
-wordre = "[A-Za-z0-9'-]"
 def searchify(search_string):
     '''
     inputs: string
     output: dictionary {word: count}
     removes plurals 
     '''
-    
+    wordre = "[A-Za-z0-9'-]"
     l = re.findall()
-    
     
     ### turn numbers into words
     ### remove capitals
+    ### also apply this function to parsing scraped data
     
-default_search = {'yellow':4,'brick':5,'road':2,'I':1,'love':4,'ART':2}
+
+    
+##### Search main
+'''
+Assuming args_from_ui is something like
+args = {
+            'date_lower'    : dd/mm/yyyy
+            'date_upper'    : dd/mm/yyyy
+            'search_terms'  : 'blah blah blah'
+            'Museums'       : ['001','002',...]
+            'order_by'      : 'date_asc' or 'date_dec' or 'search'
+        }
+        
+also possible to implement 'more like this' functionality
+where user clicks on an exhibit and we return similar exhibits (possibly filtered too)
+
+search should return:
+    ( (Headers), [ (results) ] )
+    ranked by search similarity or by date or something
+'''
+
+def search(args):
+    '''
+    Assuming we can get args_from_ui as a dict { 'field', ui input }
+    we search things and return results
+    '''
+    (dim,exhibits)=args.get('museums')
+    key_words = serachify[args['search_terms']]
+    search_results = key_word_search(key_words,dim,exhibits)
+    
+default_key_word_search = {'yellow':4,'brick':5,'road':2,'I':1,'love':4,'ART':2,'SqUaRE':1}

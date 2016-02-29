@@ -1,0 +1,50 @@
+Thing to do                                     Person          Status              Notes
+
+Front end:
+    - figure out forms.forms                                                        really fucking important but confusing (see a TA)
+        - html template
+    - Make it pretty with css                   Cynthia         in progress
+    
+Search:
+    - Search by museum                          Casper          in progress         this is built into key word search. Need functionality for no key words given
+    - Cosine similarity key word search                         in progress
+        - cosine similarity functions                           Done
+        - regex clean words                     Renee           in progress
+            
+    - Sort search
+    - Return search in a nice format
+    
+Parser:
+    - add regex cleaner to title/desc words     Renee                   
+
+Web scraping:                                                   DONE
+________________________________________________________________________________
+SEARCH / DJANGO INTERACTION
+
+args_from_ui = {
+                    'date_lower'    : dd/mm/yyyy        << if we have time
+                    'date_upper'    : dd/mm/yyyy        << if we have time
+                    'search_terms'  : 'blah blah blah'
+                    'Museums'       : ['001','002',...]
+                    'order_by'      : 'date_asc' or 'date_dec' or 'search'
+                }
+        
+search should return:
+    ( (Headers), [ (results) ] ) <- whoever makes html template gets to decide
+    
+    ranked by search similarity or by date or something
+________________________________________________________________________________
+Our new technology:
+    1. Cosine similarity search
+    2. Pandas
+    3. <<<<<<<<<<<<<<<<<<<<
+    
+________________________________________________________________________________
+Other features:
+        'more like this' functionality
+            where user clicks on an exhibit and we return similar exhibits
+            note we have comparison function which returns list of exhibits
+            ordered by cosine similarity. The hard part for this is the Django.
+            Maybe we could filter this by date too.
+            
+        Search by dates?

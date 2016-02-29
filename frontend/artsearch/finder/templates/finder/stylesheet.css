@@ -12,6 +12,10 @@ h2 {
     font-weight: bold;
 }
 
+form {
+    font-size: 0.8em;
+}
+
 #desc {
     font-size: 0.8em;
     width: 400px;

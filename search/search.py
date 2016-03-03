@@ -34,47 +34,52 @@ class Search():
         '''
         exhibits = pd.read_csv(exhibits_file,dtype={'ex_id':str})
         self.words = list(exhibits['word'].unique())
-        self.ex_list = exhibits['ex_id'].unique()
+        self.ex_list = list(exhibits['ex_id'].unique())
         self.num_ex  = len(self.ex_list)
         self.num_ex_with_word = {}
         for w in self.words:
             self.num_ex_with_word[w] = len(exhibits[exhibits['word']==w]['ex_id'].unique())
             
         self.ex_vects = self.vectorize_exhibits(exhibits)
-        self.comparison_table = build_comparison_table()
+        self.comparison_table = self.build_comparison_table(exhibits)
     
     def tf_idf(self,term,document):
         '''
         term frequency-inverse document frequency (tf-idf)
         this normalizes a given word so rarer words are worth more
         '''
-        term_frequency = document[term]             
+        term_frequency = document.get(term,0)           
         max_frequency_in_doc = max(document.values())    
-        tf = .5 +.5*(term_frequency/max_frequency_in_doc)             
+        tf = (term_frequency/max_frequency_in_doc)  
+        print (tf)
         num_rel_docs = 1 + self.num_ex_with_word.get(term,0)
         idf = np.log( self.num_ex/num_rel_docs ) 
+        print (idf)
         return tf*idf
         
     def vectorize_exhibits(self,exhibits):
         '''
         Makes tf_idf adjusted vector for each exhibit
-        data stored in { museum: { ex_id : vector}}
+        data stored in { ex_id : vector }
         '''
-        return {}
-        
-    #Not done
+        ex_dics = {}
+        for e in self.ex_list:
+            ex_dic = { k:len(v) for k,v in 
+                exhibits[exhibits['ex_id']==e].groupby('word').groups.items() }
+            ex_dics[e] = self.vectorize_dict(ex_dic) 
+        return ex_dics
         
     def build_comparison_table(self,exhibits):
         '''
         Makes a pandas data frame comparing exhibits
         '''
-        comparison = pd.dataframe(columns = self.ex_list, index = self.ex_list)
+        comparison = pd.DataFrame(columns = self.ex_list, index = self.ex_list)
         
-        for ex in self.ex_list():
+        for ex in self.ex_list:
             comparison[ex][ex] = 0.0
         for (ex1,ex2) in itertools.combinations(self.ex_list,2):
-            v1 = self.ex_vects[ex1[:2]][ex1]
-            v2 = self.ex_vects[ex2[:2]][ex1]
+            v1 = self.ex_vects[ex1]
+            v2 = self.ex_vects[ex2]
             d = spatial.distance.cosine(v1,v2)
             comparison[ex1][ex2] = d
             comparison[ex2][ex1] = d
@@ -86,10 +91,11 @@ class Search():
         return exhibits from given museums
         sorted by cosine similarity
         '''
-        return []
-        
-    #Not done
-    
+        res = [x for x in self.comparison_table[ex_id].iteritems()]
+        res = [r for r in res if r[:2] in museums]
+        res.sort(key = lambda x:x[1])
+        return [r[0] for r in res]
+
     def vectorize_dict(self,key_words):
         '''
         takes a dictionary of key words, turns it into a tfidf adjusted vector
@@ -112,10 +118,9 @@ class Search():
         '''
         search_vect = self.vectorize_dict(key_words)
         results = []
-        for m in museums:
-            for ex in self.ex_vects[m]:
-                dist = spatial.distance.cosine(search_vect,self.ex_vects[m][ex])
-                results.append( (ex, dist))
+        for ex in [x for x in self.ex_list if x[:3] in museums]:
+            dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
+            results.append( (ex, dist))
         results.sort(key=lambda x: x[1])
         
         return results[ : min(len(results), num_results)]
@@ -320,7 +325,7 @@ def get_search_object(force = False):
     '''
     fp = FILE_PATHS['search_object']
     
-    if os.path.isfile(fp) or not force:
+    if os.path.isfile(fp) and not force:
         with open(fp,'r') as pik:
             S = pickle.load(pik)
     else:

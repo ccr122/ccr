@@ -11,6 +11,7 @@ import os.path
 import re
 import numpy as np
 from num2words import num2words
+import csv
 
 '''
 exhibits = pandas dataframe filtered down by museums
@@ -24,7 +25,9 @@ Also if we have time we should be able to update these data
 '''
 FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
-                'search_object' : 'pickled_search_object'
+                'search_object' : 'pickled_search_object',
+                'titles'        : 'csvs/ex_id_to_ex_title.csv',
+                'urls'          : 'csvs/ex_id_to_url.csv'
                 }
 
 class Search():
@@ -125,22 +128,25 @@ class Search():
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
             results.append( (ex, dist))
-        results.sort(key=lambda x: x[1])
-        return results[ : min(len(results), num_results)]
+        results.sort(key=lambda x: x[1]) 
+        results = results[ : min(len(results), num_results)]
+        return [ r[0] for r in results ]
 
 #### Helper functions
 
-def get_search_object(force = False):
+def get_search_object(path_to_searchpy = '',force = False):
     '''
     checks if it is saved, builds if it is not
     '''
-    fp = FILE_PATHS['search_object']
+    fp = path_to_searchpy + FILE_PATHS['search_object']
     if os.path.isfile(fp) and not force:
+        print('found pickled search object')
         with open(fp,'r') as pik:
             S = pickle.load(pik)
     else:
+        print('making pickle and search object')
         with open(fp,'w') as pik:
-            S = Search( FILE_PATHS['ex_desc_csv'] )
+            S = Search( path_to_searchpy + FILE_PATHS['ex_desc_csv'] )
             pickle.dump(S,pik)
     return S
 
@@ -150,6 +156,22 @@ def searchify(search_text):
     returns dictionary {normalized_word : count}
     '''
     return{}
+
+def get_ex_attribute(path_to_searchpy='',ex_id,attribute):
+    '''
+    Given ex_id and attribute, returns that exhibit's attribute
+    '''
+    assert attribute in ['url','title']
+
+    fp = path_to_searchpy + FILE_PATHS(attribute)
+    with open( path_to_searchpy + 'csvs/ex_id_to_ex_title.csv') as f:
+        reader = csv.reader(f, delimiter='|')
+        next(reader)
+        for row in reader:
+            if ex_id == row[0]:
+                return row[1]
+
+
 
 ############# Theses guys interact with Django
 

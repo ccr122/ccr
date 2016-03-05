@@ -5,20 +5,29 @@ Key:
 Thing to do                                     Person          Status              Notes
 
 Front end:
-    - figure out forms.forms                    Cynthia/Casper                      <- i will go to OH on thursday
-        - html template
-    - Make it pretty with css                   Cynthia         in progress         <- i will go to OH on thursday
+    - figure out forms.forms 
+        - Fix multiple checkbox                 Casper          Done
+        - 'start' html template                                 Done
+
+        - Get CSS to work
+    - Make it pretty with css                   Cynthia         in progress    
     
-    * Call search 
+     Make a results page?                                                   <- so we can show-off similar results functionality
+        - Make HTML
+        - Make CSS work
+        - Link it in urls
+
+    * Call search                               Casper          In progress
+        - import s-o into views
+            - fix file path breaking problem
+        - make sure it stays loaded in server
     
 Search:
                                                                                     renee asks: the scraped dictionary should already have museum info in it ??    
-    - Search by museum                          Casper          in progress         this is built into key word search. Need functionality for no key words given
-    - Cosine similarity key word search                         in progress
-        - cosine similarity functions                           Done                <-casper will check with TA to make sure its good.
+    - Search by museum                          Casper          Done
+    - Sort search                               Casper/renee    Done
 
-    - Sort search                               Casper/Renee
-    * Return search in a nice format                                                <- Depends on HTML template **so its like the last thing we do
+    * Return search in a nice format                                        <- Depends on HTML template **so its like the last thing we do
     
 Parser:
     - parse any string                          Renee           DONE    

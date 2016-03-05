@@ -66,7 +66,7 @@ def make_csv(indexes, var_of_interest, filename):
         for museum in indexes:
             for exhibit in museum:
                 var_value = museum[exhibit][var_of_interest]
-                line = '{},{}\n'.format(str(exhibit), str(var_value))
+                line = '{}|{}\n'.format(str(exhibit), str(var_value))
                 f.write(line)
 
 def make_date_csv(indexes, filename):

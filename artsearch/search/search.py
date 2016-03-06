@@ -26,8 +26,8 @@ Also if we have time we should be able to update these data
 FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
                 'search_object' : 'pickled_search_object',
-                'titles'        : 'csvs/ex_id_to_ex_title.csv',
-                'urls'          : 'csvs/ex_id_to_url.csv'
+                'title'        : 'csvs/ex_id_to_ex_title.csv',
+                'url'          : 'csvs/ex_id_to_ex_url.csv'
                 }
 
 class Search():
@@ -36,7 +36,7 @@ class Search():
     a lot of commonly cited calculations for later use
     with regards to cosine similarity document searches anyway
     It gets pickled
-    '''
+    ''' 
     def __init__(self,exhibits_file):
         '''
         Run ALL the calculations
@@ -59,7 +59,7 @@ class Search():
         '''
         term_frequency = document.get(term,0)           
         max_frequency_in_doc = max(document.values())    
-        tf = 5+5*(term_frequency/max_frequency_in_doc)  
+        tf = 50.0*(term_frequency/max_frequency_in_doc)  
         num_rel_docs = 1 + self.num_ex_with_word.get(term,0)
         idf = np.log( self.num_ex/num_rel_docs ) 
         return tf*idf
@@ -102,15 +102,17 @@ class Search():
             comparison[ex2][ex1] = d
         return comparison
     
-    def similar_exhibits(self,ex_id,museums):
+    def similar_exhibits(self,ex_id,museums,num_results):
         '''
         return exhibits from given museums
         sorted by cosine similarity
         '''
-        res = [x for x in self.comparison_table[ex_id].iteritems()]
-        res = [r for r in res if r[:2] in museums]
+        if len(museums) == 0:
+            museums = self.museums
+        res = [x for x in self.comparison_table[ex_id].iteritems()
+                if x[0][:3] in museums]
         res.sort(key = lambda x:x[1])
-        return [r[0] for r in res]
+        return [r[0] for r in res][1:min(len(res),num_results+1)]
         
     def search(self,key_words,museums, num_results):
         '''
@@ -122,15 +124,15 @@ class Search():
             closest num_result museums from your museums of choice
         '''
         search_vect = self.vectorize_dict(key_words)
-        results = []
+        results     = []
         if len(museums) == 0:
             museums = self.museums
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
             results.append( (ex, dist))
         results.sort(key=lambda x: x[1]) 
-        results = results[ : min(len(results), num_results)]
-        return [ r[0] for r in results ]
+        results = [ r[0] for r in results if r[1] != 1.0 ]
+        return results[ : min(len(results), num_results)]
 
 #### Helper functions
 
@@ -157,14 +159,14 @@ def searchify(search_text):
     '''
     return{}
 
-def get_ex_attribute(path_to_searchpy='',ex_id,attribute):
+def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
     '''
     Given ex_id and attribute, returns that exhibit's attribute
     '''
     assert attribute in ['url','title']
 
-    fp = path_to_searchpy + FILE_PATHS(attribute)
-    with open( path_to_searchpy + 'csvs/ex_id_to_ex_title.csv') as f:
+    fp = path_to_searchpy + FILE_PATHS[attribute]
+    with open( fp ) as f:
         reader = csv.reader(f, delimiter='|')
         next(reader)
         for row in reader:
@@ -172,6 +174,42 @@ def get_ex_attribute(path_to_searchpy='',ex_id,attribute):
                 return row[1]
 
 
+def str_to_dict(s):
+    '''
+    input: string
+    output: dictionary {word: count}
+    '''
+    word_dict = {}
+    l = re.findall(wordre, s)
+    for i in range(len(l)):
+        if type(l[i])== int:             # turn numbers into words
+            l[i] = num2words(l[i])
+        
+        l[i] = l[i].lower()             # make all letters lowercase 
+        
+        if l[i][0] == "'":              # remove single quotes from beginning/
+            l[i] = l[i][1:]             # end of words in l
+        elif l[i][-1] == "'":
+            l[i] = l[i][:-1]
+            
+        if l[i] not in INDEX_IGNORE:
+            if l[i] not in word_dict:   # build dictionary
+                word_dict[l[i]] = 1
+            else:
+                word_dict[l[i]] += 1
+            
+    words = word_dict.keys()            # remove plurals
+    for i in range(len(words)):
+        if words[i][-1] == 's':
+            if words[i][:-1] == words[i-1]:
+                word_dict[i-1] += word_dict[i]
+                del word_dict[i]
+        elif words[i][-1] == 'es':
+            if words[i][:-2] == words[i-1]:
+                word_dict[i-1] += word_dict[i]
+                del word_dict[i]
+    
+    return word_dict
 
 ############# Theses guys interact with Django
 

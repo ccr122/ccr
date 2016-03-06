@@ -25,11 +25,20 @@
                 Results: 
         </h2>
         <ul>
-            {% for res in result %}
-                <li href={{res.0}}> {{res.1}} </li>
+            {% for url,title, similars in result %}
+               <a href={{url}}> <li> {{title}} </li> </a>
+        
+                <ul>
+                    {% for s in similars %}
+                    <a href = {{s.0}}> <li> {{s.1}} </li></a>
+                    {% endfor %}
+                </ul>
+   
             {% endfor %}
         </ul>
     {% endif %}
 </div>
+
+
 </body>
 </html>

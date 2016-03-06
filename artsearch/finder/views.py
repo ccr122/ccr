@@ -1,18 +1,12 @@
 from django.shortcuts import render
 from django import forms
-from  search.search import get_search_object, Search, get_ex_attribute
-
+from  search.search import *
 import os
-#os.chdir('..')
-print ('\n\n\n\n working directory:'+str(os.getcwd()))
-
 parent = os.path.dirname(os.path.dirname(__file__))
 
 PATH_to_searchpy = str(os.path.join(parent,'search/'))
 print('\t\t'+PATH_to_searchpy)								# Can't get pickles to work :C
-s_o = get_search_object(PATH_to_searchpy,force = True)
-
-
+s_o = get_search_object(PATH_to_searchpy)
 
 # Create your views here.
 
@@ -23,13 +17,14 @@ MUSEUMS = [	('001', 'Art Institute of Chicago'),
 			('005', 'DeYoung Museum'),
 			('006', 'Legion of Honor')	]
 
-
 def start(request):
 	'''
 	Our main (only) page. Takes request
 	checks if there is a form filled
 	loads html with filler (results)
 	'''
+	result = None
+	similar_results = None
 	if request.method == 'GET':
 		form = searchform(request.GET)
 		if form.is_valid():
@@ -37,23 +32,47 @@ def start(request):
 			print (form.cleaned_data)
 			args = form.cleaned_data
 			result = get_results(args)
-
-	#result= [('google.com','google'),('facebook.com','facebook')]	
-
 	c = {'form':form, 'result': result}
-	return render(request, 'finder/start.html',c) # NEED HELP WITH HTML (CAN'T CALL ELEMENTS OF TUPLE)
+	return render(request, 'finder/start.html', c)
 
 def get_results(args):
 	'''
 	Take args and use serach engine
 	'''
-	num_results = 5
-	key_words 	= searchify(args.get('text'))
+	num_results = 10
+	key_words = {}						# RENEEEEEE this is where your better words function goes
+	for w in args.get('text').split():
+		if w in key_words:
+			key_words[w]+=1
+		else:
+			key_words[w]=1
+
+	#key_words 	= str_to_dict(args.get('text'))   <<<<<<<<<<<<<<<<<<<<< this one specifically
 	museums 	= args.get('museums')
 	res = s_o.search(key_words,museums,num_results)
-	return [  (	get_ex_attribute(PATH_to_searchpy,r, 'url'),
-			 	get_ex_attribute(PATH_to_searchpy,r, 'title') )
-			for r in res    ]
+
+	if len(res) == 0:
+		return [(' ','No results', None )]
+
+	results = []
+	for r in res:
+		u = get_ex_attribute( r, 'url'  , PATH_to_searchpy)
+		t = get_ex_attribute( r, 'title', PATH_to_searchpy)
+		s = get_similar_results(r, museums)
+		results += [(u,t,s)]
+
+	return results
+
+def get_similar_results(ex_id,museums):
+	'''
+	Given exhibit ID and seleced museums, similar_exhibits at those museums
+	'''
+	num_results = 10
+	res = s_o.similar_exhibits(ex_id,museums,num_results)
+	return [ ( 	get_ex_attribute( r, 'url'	, PATH_to_searchpy),
+				get_ex_attribute( r, 'title', PATH_to_searchpy)	 )
+			for r in res ]
+
 
 
 class searchform( forms.Form  ):
@@ -72,26 +91,5 @@ class searchform( forms.Form  ):
 		)
 
 
-	
-
-#class fill_filler(self):
-'''
-	Takes the results after searching tables
-	turns it into args for our html 
-	'''
-''' HTML CODE BECAUSE YOU CANT MULTILINE COMMENT IN HTML
-<form method='get'>
-	This is the form.
-	<br>
-	Keyword search:
-	<input type='text'>
-	<br>
-	If you would like to select from specific museums, click it's button. By default we search from every museum
-	<ul>
-		{% for m in museum %}
-		<input type ='radio'name={{m}}}>{{m}}</input>
-		{% endfor %}
-	</ul>
-'''
 
 

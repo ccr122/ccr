@@ -1,7 +1,7 @@
 html, body {
+    background-color: ;
     font-family: Helvetica;
-    padding: 70px;
-    background-color: red;
+    padding: 50px;
 }
 
 h2 {
@@ -29,6 +29,26 @@ li {
 }
 
 
-#similars {
+#reveal {
     display: none;
+    font-size: 0.8em;
+}
+
+button {
+    color: black;
+    height: 30px;
+    background-color: white;
+    border: 1px solid black;
+    text-align: center;
+    font-size: 0.8em;
+    border-radius: 5px;
+
+}
+
+button:hover {
+    color: white;
+    background-color: black;
+    border: 1px solid black;
+
+
 }

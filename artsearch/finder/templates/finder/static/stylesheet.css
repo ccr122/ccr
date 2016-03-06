@@ -27,3 +27,8 @@ li {
     font-size: 0.8em;
     padding: 5px 0;
 }
+
+
+#similars {
+    display: none;
+}

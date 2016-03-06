@@ -1,1 +1,3 @@
-change display:none to display:block for ids 'similars'
+function display() {
+    document.getElementById("similars").setAttribute("display", "block");
+}

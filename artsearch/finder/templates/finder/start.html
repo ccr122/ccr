@@ -4,6 +4,7 @@
 <head>
     <title>Exhibit search</title>
     <link rel="stylesheet" type="text/css" href="/static/stylesheet.css" />
+    <script type="text/javascript" src="/static/script.js" />
 </head>
 
 <body>
@@ -30,7 +31,7 @@
         
                 <ul>
                     {% for s in similars %}
-                    <a href = {{s.0}}> <li id="similars"> {{s.1}} </li></a>
+                    <a href = {{s.0}}> <li id="similars" onclick="display()"> {{s.1}} </li></a>
                     {% endfor %}
                 </ul>
    

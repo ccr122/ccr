@@ -50,18 +50,18 @@ class Search():
         for w in self.words:
             self.num_ex_with_word[w] = len(exhibits[exhibits['word']==w]['ex_id'].unique())
         self.ex_vects = self.vectorize_exhibits(exhibits)
-        self.comparison_table = self.build_comparison_table(exhibits)
+        self.comparison_table = self.build_comparison_table()
     
     def tf_idf(self,term,document):
         '''
         term frequency-inverse document frequency (tf-idf)
         this normalizes a given word so rarer words are worth more
         '''
-        term_frequency = document.get(term,0)           
-        max_frequency_in_doc = max(document.values())    
+        term_frequency = float(document.get(term,0.0) )          
+        max_frequency_in_doc = float(max(document.values()) )   
         tf = 50.0*(term_frequency/max_frequency_in_doc)  
-        num_rel_docs = 1 + self.num_ex_with_word.get(term,0)
-        idf = np.log( self.num_ex/num_rel_docs ) 
+        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)
+        idf = np.log( float(self.num_ex)/float(num_rel_docs) ) 
         return tf*idf
 
     def vectorize_dict(self,key_words):
@@ -70,8 +70,6 @@ class Search():
         '''
         v = []
         for w in self.words:
-            x = key_words.get(w,0)
-            assert type(x) == int
             v.append(self.tf_idf(w,key_words))
         return v
 
@@ -87,7 +85,7 @@ class Search():
             ex_dics[e] = self.vectorize_dict(ex_dic) 
         return ex_dics
         
-    def build_comparison_table(self,exhibits):
+    def build_comparison_table(self):
         '''
         Makes a pandas data frame comparing exhibits
         '''
@@ -124,15 +122,15 @@ class Search():
             closest num_result museums from your museums of choice
         '''
         search_vect = self.vectorize_dict(key_words)
-        results     = []
+        res     = []
         if len(museums) == 0:
             museums = self.museums
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
-            results.append( (ex, dist))
-        results.sort(key=lambda x: x[1]) 
-        results = [ r[0] for r in results if r[1] != 1.0 ]
-        return results[ : min(len(results), num_results)]
+            if dist < 1.0:
+                res.append( (ex, dist) ) 
+        res.sort(key=lambda x: x[1]) 
+        return [r[0] for r in res]
 
 #### Helper functions
 
@@ -143,21 +141,17 @@ def get_search_object(path_to_searchpy = '',force = False):
     fp = path_to_searchpy + FILE_PATHS['search_object']
     if os.path.isfile(fp) and not force:
         print('found pickled search object')
-        with open(fp,'r') as pik:
-            S = pickle.load(pik)
-    else:
-        print('making pickle and search object')
-        with open(fp,'w') as pik:
-            S = Search( path_to_searchpy + FILE_PATHS['ex_desc_csv'] )
-            pickle.dump(S,pik)
+        try:
+            with open(fp,'r') as pik:
+                S = pickle.load(pik)
+            return S
+        except ImportError:
+            print ( '\timport error')
+    print('making pickle and search object')
+    with open(fp,'w') as pik:
+        S = Search( path_to_searchpy + FILE_PATHS['ex_desc_csv'] )
+        pickle.dump(S,pik)
     return S
-
-def searchify(search_text):
-    '''
-    takes search term string
-    returns dictionary {normalized_word : count}
-    '''
-    return{}
 
 def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
     '''
@@ -172,7 +166,6 @@ def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
         for row in reader:
             if ex_id == row[0]:
                 return row[1]
-
 
 def str_to_dict(s):
     '''
@@ -224,7 +217,6 @@ def search(args):
     s = get_search_object()
     s.search(key_words,museums,num_results)
 
-
 def find_similar_exhibits(args,museums):
     '''
     args = {    ex_id: similar to this guy
@@ -236,7 +228,5 @@ def find_similar_exhibits(args,museums):
     assert type(museums)==list
     s = get_search_object()
     s.similar_exhibits(ex_id,museums)
-
-
 
 default_key_word_search = {'yellow':4,'brick':5,'road':2,'I':1,'love':4,'ART':2,'SqUaRE':1}

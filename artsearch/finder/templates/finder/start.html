@@ -3,18 +3,23 @@
 <html>
 <head>
     <title>Exhibit search</title>
-    <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+    <link rel="stylesheet" type="text/css" href={% static 'stylesheet.css' %} />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script type="text/javascript" src="script.js"></script>
+
 </head>
 
 <body>
 <h1> Exhibit search </h1>
-<button id="similars" onclick="displaySimilar()">Similar Exhibits</button>
-<p id="reveal">This will be revealed.</p>
 <div id="desc">
-	<p>Search for museum exhibits based with a museum search and a keyword search.</p>
-	<p>Check off the museums you would like to search through, and type in some keywords to search by. Your results will be displayed below.</p>
+	<p>
+        Search for museum exhibits based with a museum search and a keyword search.
+    </p>
+	<p>
+        Check off the museums you would like to search through, and type in some keywords to search by. Your results will be displayed below.
+    </p>
+    <p>
+        Click "Similar Exhibits" to find the exhibits most similar to that exhibit
+    </p>
 </div>
 
 <form>
@@ -30,8 +35,8 @@
         <ul>
             {% for url,title, similars in result %}
                <a href={{url}}> <li> {{title}} </li> </a>
-        
-                <ul>
+                <button class="similars" onclick="displaySimilar()">Similar Exhibits</button>
+                <ul class='reveal' >
                     {% for s in similars %}
                     <a href = {{s.0}}> <li> {{s.1}} </li></a>
                     {% endfor %}
@@ -44,4 +49,5 @@
 
 
 </body>
+<script type="text/javascript" src={% static "script.js"%}></script>
 </html>

@@ -22,19 +22,19 @@ NUM_SIMILARS    = 5
 NUM_RESULTS     = 10
 
 
-def make_file_paths(path_to_searchpy = ''):
+def make_file_paths(path_to_search_dir = ''):
     '''
     dict to relevant urls
-    needs path_to_searchpy if imported into another file - like Django's views
+    needs path_to_search_dir if imported into another file - like Django's views
     '''
-    assert type(path_to_searchpy) == str
+    assert type(path_to_search_dir) == str
     FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
                 'search_object' : 'pickled_search_object',
                 'title'         : 'csvs/ex_id_to_ex_title.csv',
                 'url'           : 'csvs/ex_id_to_ex_url.csv'
                 }
-    return {  k : path_to_searchpy + v for k,v in FILE_PATHS.items() }
+    return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
 
 
 
@@ -141,17 +141,17 @@ class Search():
         res.sort(key=lambda x: x[1]) 
         return [r[0] for r in res]
 
-    def get_similar_results(self,ex_id,museums,path_to_searchpy = ''):
+    def get_similar_results(self,ex_id,museums,path_to_search_dir = ''):
         '''
         Given exhibit ID and seleced museums, similar_exhibits at those museums
         '''
         num_results = NUM_SIMILARS
         res = self.similar_exhibits(ex_id,museums,num_results)
-        return [ (  get_ex_attribute( r, 'url'  , path_to_searchpy),
-                    get_ex_attribute( r, 'title', path_to_searchpy)  )
+        return [ (  get_ex_attribute( r, 'url'  , path_to_search_dir),
+                    get_ex_attribute( r, 'title', path_to_search_dir)  )
                 for r in res ]
 
-    def get_results(self,args,path_to_searchpy = ''):
+    def get_results(self,args,path_to_search_dir = ''):
         '''
         Take args and use serach engine
         '''
@@ -165,20 +165,20 @@ class Search():
 
         results = []
         for r in res:
-            u = get_ex_attribute( r, 'url'  , path_to_searchpy)
-            t = get_ex_attribute( r, 'title', path_to_searchpy)
-            s = self.get_similar_results(r, museums,path_to_searchpy)
+            u = get_ex_attribute( r, 'url'  , path_to_search_dir)
+            t = get_ex_attribute( r, 'title', path_to_search_dir)
+            s = self.get_similar_results(r, museums,path_to_search_dir)
             results += [(u,t,s)]
         return results
 
 #### Helper functions
 
-def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
+def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
     '''
     Given ex_id and attribute, returns that exhibit's attribute
     '''
     assert attribute in ['url','title']
-    file_paths = make_file_paths(path_to_searchpy)
+    file_paths = make_file_paths(path_to_search_dir)
 
     fp = file_paths[attribute]
     with open( fp ) as f:
@@ -190,11 +190,11 @@ def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
 
 ############# Theses guys interact with Django
 
-def get_search_object(path_to_searchpy = '',force = False):
+def get_search_object(path_to_search_dir = '',force = False):
     '''
     checks if it is saved, builds if it is not
     '''
-    file_paths = make_file_paths(path_to_searchpy)
+    file_paths = make_file_paths(path_to_search_dir)
     fp = file_paths['search_object']
     if os.path.isfile(fp) and not force:
         print('found pickled search object')
@@ -206,7 +206,7 @@ def get_search_object(path_to_searchpy = '',force = False):
             print ( '\timport error')
     print('making pickle and search object')
     with open(fp,'w') as pik:
-        S = Search( path_to_searchpy + file_paths['ex_desc_csv'] )
+        S = Search( path_to_search_dir + file_paths['ex_desc_csv'] )
         pickle.dump(S,pik)
     return S
 

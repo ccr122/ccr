@@ -7,7 +7,7 @@ parent = os.path.dirname(os.path.dirname(__file__))
 PATH_to_searchpy = str(os.path.join(parent,'search/'))
 print('\t\t'+PATH_to_searchpy)	
 
-s_o = get_search_object(PATH_to_searchpy,force=True)
+s_o = get_search_object(PATH_to_searchpy)
 
 
 

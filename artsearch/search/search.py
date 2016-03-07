@@ -127,6 +127,7 @@ class Search():
             museums = self.museums
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
+            print(str(ex)+'\t'+str(dist))
             if dist < 1.0:
                 res.append( (ex, dist) ) 
         res.sort(key=lambda x: x[1]) 

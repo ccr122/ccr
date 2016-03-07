@@ -34,7 +34,7 @@
         </h2>
         <ul>
             {% for url,title, similars in result %}
-               <a href={{url}}> <li> {{title}} </li> </a>
+                <a href={{url}}> <li class="ex_title"> {{title}} </li> </a>
                 <button class="to_reveal">Similar Exhibits</button>
                 <ul class="reveal" >
                     {% for s in similars %}

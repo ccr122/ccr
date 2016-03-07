@@ -32,8 +32,13 @@ li {
     padding: 5px 0;
 }
 
+.ex_title {
+    display: inline;
+}
+
 .to_reveal {
     display: inline;
+    padding-left: 3px;
 }
 
 .reveal {

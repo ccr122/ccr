@@ -12,23 +12,31 @@ import re
 import numpy as np
 from num2words import num2words
 import csv
+#from parse import str_to_dict
+'''
+This function contains the search object and helper functions for django to call
 
 '''
-exhibits = pandas dataframe filtered down by museums
-dim = [ all the words in all descriptions (no duplicates) ]
-comparisons = [ (exhibit1, exhibit2, theta),...]
 
-We need to save and reopen exhibits,comparisons, and dim so its faster.
-Also if we have time we should be able to update these data
-    without reconstructing everything
+NUM_SIMILARS    = 5
+NUM_RESULTS     = 10
 
-'''
-FILE_PATHS = {  
+
+def make_file_paths(path_to_search_dir = ''):
+    '''
+    dict to relevant urls
+    needs path_to_search_dir if imported into another file - like Django's views
+    '''
+    assert type(path_to_search_dir) == str
+    FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
                 'search_object' : 'pickled_search_object',
-                'title'        : 'csvs/ex_id_to_ex_title.csv',
-                'url'          : 'csvs/ex_id_to_ex_url.csv'
+                'title'         : 'csvs/ex_id_to_ex_title.csv',
+                'url'           : 'csvs/ex_id_to_ex_url.csv'
                 }
+    return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
+
+
 
 class Search():
     '''
@@ -50,18 +58,18 @@ class Search():
         for w in self.words:
             self.num_ex_with_word[w] = len(exhibits[exhibits['word']==w]['ex_id'].unique())
         self.ex_vects = self.vectorize_exhibits(exhibits)
-        self.comparison_table = self.build_comparison_table(exhibits)
+        self.comparison_table = self.build_comparison_table()
     
     def tf_idf(self,term,document):
         '''
         term frequency-inverse document frequency (tf-idf)
         this normalizes a given word so rarer words are worth more
         '''
-        term_frequency = document.get(term,0)           
-        max_frequency_in_doc = max(document.values())    
+        term_frequency = float(document.get(term,0.0) )          
+        max_frequency_in_doc = float(max(document.values()) )   
         tf = 50.0*(term_frequency/max_frequency_in_doc)  
-        num_rel_docs = 1 + self.num_ex_with_word.get(term,0)
-        idf = np.log( self.num_ex/num_rel_docs ) 
+        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)
+        idf = np.log( float(self.num_ex)/float(num_rel_docs) ) 
         return tf*idf
 
     def vectorize_dict(self,key_words):
@@ -70,8 +78,6 @@ class Search():
         '''
         v = []
         for w in self.words:
-            x = key_words.get(w,0)
-            assert type(x) == int
             v.append(self.tf_idf(w,key_words))
         return v
 
@@ -87,7 +93,7 @@ class Search():
             ex_dics[e] = self.vectorize_dict(ex_dic) 
         return ex_dics
         
-    def build_comparison_table(self,exhibits):
+    def build_comparison_table(self):
         '''
         Makes a pandas data frame comparing exhibits
         '''
@@ -124,48 +130,57 @@ class Search():
             closest num_result museums from your museums of choice
         '''
         search_vect = self.vectorize_dict(key_words)
-        results     = []
+        res     = []
         if len(museums) == 0:
             museums = self.museums
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
-            results.append( (ex, dist))
-        results.sort(key=lambda x: x[1]) 
-        results = [ r[0] for r in results if r[1] != 1.0 ]
-        return results[ : min(len(results), num_results)]
+            print(str(ex)+'\t'+str(dist))
+            if dist < 1.0:
+                res.append( (ex, dist) ) 
+        res.sort(key=lambda x: x[1]) 
+        return [r[0] for r in res]
+
+    def get_similar_results(self,ex_id,museums,path_to_search_dir = ''):
+        '''
+        Given exhibit ID and seleced museums, similar_exhibits at those museums
+        '''
+        num_results = NUM_SIMILARS
+        res = self.similar_exhibits(ex_id,museums,num_results)
+        return [ (  get_ex_attribute( r, 'url'  , path_to_search_dir),
+                    get_ex_attribute( r, 'title', path_to_search_dir)  )
+                for r in res ]
+
+    def get_results(self,args,path_to_search_dir = ''):
+        '''
+        Take args and use serach engine
+        '''
+        num_results = NUM_RESULTS
+        key_words  = str_to_dict(args.get('text')) 
+        museums     = args.get('museums')
+        res = self.search(key_words,museums,num_results)
+
+        if len(res) == 0:
+            return [(' ','No results', None )]
+
+        results = []
+        for r in res:
+            u = get_ex_attribute( r, 'url'  , path_to_search_dir)
+            t = get_ex_attribute( r, 'title', path_to_search_dir)
+            s = self.get_similar_results(r, museums,path_to_search_dir)
+            results += [(u,t,s)]
+        return results
 
 #### Helper functions
 
-def get_search_object(path_to_searchpy = '',force = False):
-    '''
-    checks if it is saved, builds if it is not
-    '''
-    fp = path_to_searchpy + FILE_PATHS['search_object']
-    if os.path.isfile(fp) and not force:
-        print('found pickled search object')
-        with open(fp,'r') as pik:
-            S = pickle.load(pik)
-    else:
-        print('making pickle and search object')
-        with open(fp,'w') as pik:
-            S = Search( path_to_searchpy + FILE_PATHS['ex_desc_csv'] )
-            pickle.dump(S,pik)
-    return S
-
-def searchify(search_text):
-    '''
-    takes search term string
-    returns dictionary {normalized_word : count}
-    '''
-    return{}
-
-def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
+def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
     '''
     Given ex_id and attribute, returns that exhibit's attribute
     '''
     assert attribute in ['url','title']
+    file_paths = make_file_paths(path_to_search_dir)
 
-    fp = path_to_searchpy + FILE_PATHS[attribute]
+    fp = file_paths[attribute]
     with open( fp ) as f:
         reader = csv.reader(f, delimiter='|')
         next(reader)
@@ -173,70 +188,35 @@ def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
             if ex_id == row[0]:
                 return row[1]
 
-
-def str_to_dict(s):
-    '''
-    input: string
-    output: dictionary {word: count}
-    '''
-    word_dict = {}
-    l = re.findall(wordre, s)
-    for i in range(len(l)):
-        if type(l[i])== int:             # turn numbers into words
-            l[i] = num2words(l[i])
-        
-        l[i] = l[i].lower()             # make all letters lowercase 
-        
-        if l[i][0] == "'":              # remove single quotes from beginning/
-            l[i] = l[i][1:]             # end of words in l
-        elif l[i][-1] == "'":
-            l[i] = l[i][:-1]
-            
-        if l[i] not in INDEX_IGNORE:
-            if l[i] not in word_dict:   # build dictionary
-                word_dict[l[i]] = 1
-            else:
-                word_dict[l[i]] += 1
-            
-    words = word_dict.keys()            # remove plurals
-    for i in range(len(words)):
-        if words[i][-1] == 's':
-            if words[i][:-1] == words[i-1]:
-                word_dict[i-1] += word_dict[i]
-                del word_dict[i]
-        elif words[i][-1] == 'es':
-            if words[i][:-2] == words[i-1]:
-                word_dict[i-1] += word_dict[i]
-                del word_dict[i]
-    
-    return word_dict
-
 ############# Theses guys interact with Django
 
-def search(args):
+def get_search_object(path_to_search_dir = '',force = False):
     '''
-    Assuming we can get args_from_ui as a dict { 'field', ui input }
-    we search things and return results
+    checks if it is saved, builds if it is not
     '''
-    key_words = searchify( args['seach_field'] )
-    museums = args['museums']
-    num_results = args['num_results']
-    s = get_search_object()
-    s.search(key_words,museums,num_results)
+    file_paths = make_file_paths(path_to_search_dir)
+    fp = file_paths['search_object']
+    if os.path.isfile(fp) and not force:
+        print('found pickled search object')
+        try:
+            with open(fp,'r') as pik:
+                S = pickle.load(pik)
+            return S
+        except ImportError:
+            print ( '\timport error')
+    print('making pickle and search object')
+    with open(fp,'w') as pik:
+        S = Search( path_to_search_dir + file_paths['ex_desc_csv'] )
+        pickle.dump(S,pik)
+    return S
 
 
-def find_similar_exhibits(args,museums):
-    '''
-    args = {    ex_id: similar to this guy
-                museums: ['001',...]            }
-    '''
-    ex_id   = args['ex_id']
-    museums = args['museums']
-    assert type(ex_id)==str
-    assert type(museums)==list
-    s = get_search_object()
-    s.similar_exhibits(ex_id,museums)
+def str_to_dict(s):
+    words = {}
+    for i in s.split():
+        if i in words:
+            words[i] += 1
+        else:
+            words[i] = 1
+    return words
 
-
-
-default_key_word_search = {'yellow':4,'brick':5,'road':2,'I':1,'love':4,'ART':2,'SqUaRE':1}

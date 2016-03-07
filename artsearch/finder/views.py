@@ -34,10 +34,10 @@ def start(request):
 			print ('\n')
 			print (form.cleaned_data)
 			args = form.cleaned_data
-			result = get_results(args)
+			result = get_results(args,PATH_to_searchpy)
 	c = {'form':form, 'result': result}
 	return render(request, 'finder/start.html', c)
-
+"""
 def get_results(args):
 	'''
 	Take args and use serach engine
@@ -75,7 +75,7 @@ def get_similar_results(ex_id,museums):
 	return [ ( 	get_ex_attribute( r, 'url'	, PATH_to_searchpy),
 				get_ex_attribute( r, 'title', PATH_to_searchpy)	 )
 			for r in res ]
-
+"""
 
 
 class searchform( forms.Form  ):

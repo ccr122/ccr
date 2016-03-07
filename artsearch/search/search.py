@@ -12,23 +12,31 @@ import re
 import numpy as np
 from num2words import num2words
 import csv
+from parse import str_to_dict
+'''
+This function contains the search object and helper functions for django to call
 
 '''
-exhibits = pandas dataframe filtered down by museums
-dim = [ all the words in all descriptions (no duplicates) ]
-comparisons = [ (exhibit1, exhibit2, theta),...]
 
-We need to save and reopen exhibits,comparisons, and dim so its faster.
-Also if we have time we should be able to update these data
-    without reconstructing everything
+NUM_SIMILARS    = 5
+NUM_RESULTS     = 10
 
-'''
-FILE_PATHS = {  
+
+def make_file_paths(path_to_searchpy = ''):
+    '''
+    dict to relevant urls
+    needs path_to_searchpy if imported into another file - like Django's views
+    '''
+    assert type(path_to_searchpy) == str
+    FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
                 'search_object' : 'pickled_search_object',
-                'title'        : 'csvs/ex_id_to_ex_title.csv',
-                'url'          : 'csvs/ex_id_to_ex_url.csv'
+                'title'         : 'csvs/ex_id_to_ex_title.csv',
+                'url'           : 'csvs/ex_id_to_ex_url.csv'
                 }
+    return {  k : path_to_searchpy + v for k,v in FILE_PATHS.items() }
+
+
 
 class Search():
     '''
@@ -135,11 +143,40 @@ class Search():
 
 #### Helper functions
 
+def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
+    '''
+    Given ex_id and attribute, returns that exhibit's attribute
+    '''
+    assert attribute in ['url','title']
+    file_paths = make_file_paths(path_to_searchpy)
+
+    fp = file_paths[attribute]
+    with open( fp ) as f:
+        reader = csv.reader(f, delimiter='|')
+        next(reader)
+        for row in reader:
+            if ex_id == row[0]:
+                return row[1]
+
+
+def get_similar_results(ex_id,museums,path_to_searchpy = ''):
+    '''
+    Given exhibit ID and seleced museums, similar_exhibits at those museums
+    '''
+    num_results = NUM_SIMILARS
+    res = s_o.similar_exhibits(ex_id,museums,num_results)
+    return [ (  get_ex_attribute( r, 'url'  , PATH_to_searchpy),
+                get_ex_attribute( r, 'title', PATH_to_searchpy)  )
+            for r in res ]
+
+############# Theses guys interact with Django
+
 def get_search_object(path_to_searchpy = '',force = False):
     '''
     checks if it is saved, builds if it is not
     '''
-    fp = path_to_searchpy + FILE_PATHS['search_object']
+    file_paths = make_file_paths(path_to_searchpy)
+    fp = file_paths['search_object']
     if os.path.isfile(fp) and not force:
         print('found pickled search object')
         try:
@@ -150,84 +187,28 @@ def get_search_object(path_to_searchpy = '',force = False):
             print ( '\timport error')
     print('making pickle and search object')
     with open(fp,'w') as pik:
-        S = Search( path_to_searchpy + FILE_PATHS['ex_desc_csv'] )
+        S = Search( path_to_searchpy + file_paths['ex_desc_csv'] )
         pickle.dump(S,pik)
     return S
 
-def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
+def get_results(args,path_to_searchpy = ''):
     '''
-    Given ex_id and attribute, returns that exhibit's attribute
+    Take args and use serach engine
     '''
-    assert attribute in ['url','title']
+    num_results = NUM_RESULTS
+    key_words  = str_to_dict(args.get('text')) 
+    museums     = args.get('museums')
+    res = s_o.search(key_words,museums,num_results)
 
-    fp = path_to_searchpy + FILE_PATHS[attribute]
-    with open( fp ) as f:
-        reader = csv.reader(f, delimiter='|')
-        next(reader)
-        for row in reader:
-            if ex_id == row[0]:
-                return row[1]
+    if len(res) == 0:
+        return [(' ','No results', None )]
 
-def str_to_dict(s):
-    '''
-    input: string
-    output: dictionary {word: count}
-    '''
-    word_dict = {}
-    l = re.findall(wordre, s)
-    for i in range(len(l)):
-        if type(l[i])== int:             # turn numbers into words
-            l[i] = num2words(l[i])
-        
-        l[i] = l[i].lower()             # make all letters lowercase 
-        
-        if l[i][0] == "'":              # remove single quotes from beginning/
-            l[i] = l[i][1:]             # end of words in l
-        elif l[i][-1] == "'":
-            l[i] = l[i][:-1]
-            
-        if l[i] not in INDEX_IGNORE:
-            if l[i] not in word_dict:   # build dictionary
-                word_dict[l[i]] = 1
-            else:
-                word_dict[l[i]] += 1
-            
-    words = word_dict.keys()            # remove plurals
-    for i in range(len(words)):
-        if words[i][-1] == 's':
-            if words[i][:-1] == words[i-1]:
-                word_dict[i-1] += word_dict[i]
-                del word_dict[i]
-        elif words[i][-1] == 'es':
-            if words[i][:-2] == words[i-1]:
-                word_dict[i-1] += word_dict[i]
-                del word_dict[i]
-    
-    return word_dict
+    results = []
+    for r in res:
+        u = get_ex_attribute( r, 'url'  , PATH_to_searchpy)
+        t = get_ex_attribute( r, 'title', PATH_to_searchpy)
+        s = get_similar_results(r, museums)
+        results += [(u,t,s)]
 
-############# Theses guys interact with Django
+    return results
 
-def search(args):
-    '''
-    Assuming we can get args_from_ui as a dict { 'field', ui input }
-    we search things and return results
-    '''
-    key_words = searchify( args['seach_field'] )
-    museums = args['museums']
-    num_results = args['num_results']
-    s = get_search_object()
-    s.search(key_words,museums,num_results)
-
-def find_similar_exhibits(args,museums):
-    '''
-    args = {    ex_id: similar to this guy
-                museums: ['001',...]            }
-    '''
-    ex_id   = args['ex_id']
-    museums = args['museums']
-    assert type(ex_id)==str
-    assert type(museums)==list
-    s = get_search_object()
-    s.similar_exhibits(ex_id,museums)
-
-default_key_word_search = {'yellow':4,'brick':5,'road':2,'I':1,'love':4,'ART':2,'SqUaRE':1}

@@ -37,46 +37,6 @@ def start(request):
 			result = s_o.get_results(args,PATH_to_searchpy)
 	c = {'form':form, 'result': result}
 	return render(request, 'finder/start.html', c)
-"""
-def get_results(args):
-	'''
-	Take args and use serach engine
-	'''
-	num_results = 10
-	key_words = {}						# RENEEEEEE this is where your better words function goes
-	for w in args.get('text').split():
-		if w in key_words:
-			key_words[w]+=1
-		else:
-			key_words[w]=1
-
-	#key_words 	= str_to_dict(args.get('text'))   <<<<<<<<<<<<<<<<<<<<< this one specifically
-	museums 	= args.get('museums')
-	res = s_o.search(key_words,museums,num_results)
-
-	if len(res) == 0:
-		return [(' ','No results', None )]
-
-	results = []
-	for r in res:
-		u = get_ex_attribute( r, 'url'  , PATH_to_searchpy)
-		t = get_ex_attribute( r, 'title', PATH_to_searchpy)
-		s = get_similar_results(r, museums)
-		results += [(u,t,s)]
-
-	return results
-
-def get_similar_results(ex_id,museums):
-	'''
-	Given exhibit ID and seleced museums, similar_exhibits at those museums
-	'''
-	num_results = 10
-	res = s_o.similar_exhibits(ex_id,museums,num_results)
-	return [ ( 	get_ex_attribute( r, 'url'	, PATH_to_searchpy),
-				get_ex_attribute( r, 'title', PATH_to_searchpy)	 )
-			for r in res ]
-"""
-
 
 class searchform( forms.Form  ):
 	'''

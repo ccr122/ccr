@@ -32,9 +32,12 @@ li {
     padding: 5px 0;
 }
 
+.to_reveal {
+    display: inline;
+}
 
 .reveal {
-    display:none;
+    display: none;
     font-size: 0.8em;
 }
 

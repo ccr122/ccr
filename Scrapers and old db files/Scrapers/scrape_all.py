@@ -60,6 +60,14 @@ INDEX_IGNORE = set(['a', 'about', 'affect', 'affects', 'all', 'among',
 
 
 def make_csv(indexes, var_of_interest, filename):
+    '''
+    Makes CSV file
+    
+    Inputs:
+      indexes: list of dictionaries containing info from 6 museums
+      var_of_interest: variable to attach to CSV file, along with exhibit ID
+      filename: name of CSV file to write
+    '''
     with open(filename, 'w') as f:
         line = 'ex_id,' + var_of_interest + '\n'
         f.write(line)
@@ -68,7 +76,7 @@ def make_csv(indexes, var_of_interest, filename):
                 var_value = museum[exhibit][var_of_interest]
                 line = '{}|{}\n'.format(str(exhibit), str(var_value))
                 f.write(line)
-
+'''
 def make_date_csv(indexes, filename):
     with open(filename, 'w') as f:
         line = 'ex_id,date\n'
@@ -79,9 +87,10 @@ def make_date_csv(indexes, filename):
                 if type(rawdate) != list:
                   #  date = rawdate.split('–')
                     date = [rawdate]
-                line = '{},{}\n'.format(str(exhibit), date)
+         #       line = '{},{}\n'.format(str(exhibit), date)
+                line = '{}|{}\n'.format(str(exhibit), date)
                 f.write(line)
-
+'''
 def make_parsed_desc_csv(indexes, filename):
     with open(filename, 'w') as f:
         line = 'ex_id,word\n'
@@ -91,19 +100,28 @@ def make_parsed_desc_csv(indexes, filename):
                 unparsed = museum[exhibit]['desc']
                 parsed = parse_desc(unparsed)
                 for word in parsed:
-                    line = '{},{}\n'.format(str(exhibit), word)
+           #         line = '{},{}\n'.format(str(exhibit), word)
+                    line = '{}|{}\n'.format(str(exhibit), word)
                     f.write(line)
 
 def make_ex_mus_id_csv(indexes, filename):
+    '''
+    Makes CSV file of exhibit ID to museum ID
+    
+    Inputs:
+      indexes: list of dictionaries containing info from 6 museums
+      filename: name of CSV file to write
+    '''
     with open(filename, 'w') as f:
         line = 'ex_id,mus_id\n'
         f.write(line)
         for museum in indexes:
             for exhibit in museum:
                 museum_id = exhibit[0:3]
-                line = '{},{}\n'.format(str(exhibit), str(museum_id))
+         #       line = '{},{}\n'.format(str(exhibit), str(museum_id))
+                line = '{}|{}\n'.format(str(exhibit), str(museum_id))
                 f.write(line)
-
+'''
 def parse_desc(unparsed_desc):
     parsed = []
     unparsed = unparsed_desc.split(' ')
@@ -121,7 +139,7 @@ def is_word(word_to_check):
         match = match.group()
         if match not in INDEX_IGNORE:
             return match
-
+'''
 
 if __name__ == "__main__":
     
@@ -171,7 +189,7 @@ if __name__ == "__main__":
 
     make_parsed_desc_csv(indexes, 'ex_id_to_ex_desc_parsed.csv')
     make_csv(indexes, 'title', 'ex_id_to_ex_title.csv')
-    make_date_csv(indexes, 'ex_id_to_ex_date.csv')
-    make_csv(indexes, 'desc', 'ex_id_to_ex_desc.csv')
+#    make_date_csv(indexes, 'ex_id_to_ex_date.csv')
+#    make_csv(indexes, 'desc', 'ex_id_to_ex_desc.csv')
     make_ex_mus_id_csv(indexes, 'ex_id_to_mus_id.csv')
     make_csv(indexes, 'url', 'ex_id_to_ex_url.csv')

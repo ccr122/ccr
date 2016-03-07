@@ -5,6 +5,9 @@ import requests
 EXHIBIT_LEN = 2
 
 def go(starting_urls, museum_id, limiting_domain):
+    '''
+    Creates dictionary of exhibit title, description, date, and url
+    '''
     index = {museum_id: {}}
     to_visit = []
 
@@ -38,6 +41,15 @@ def go(starting_urls, museum_id, limiting_domain):
 
 
 def find_description(soup):
+    '''
+    Finds exhibit description in HTML code
+    
+    Input:
+      soup: beautiful soup object
+      
+     Output:
+       description string
+    '''
     desc_string = ''
     if soup.find('meta', attrs = {'name': 'description'}):
         desc_string = soup.find('meta', attrs = {'name': 'description'})['content']
@@ -53,10 +65,19 @@ def find_description(soup):
 
 
 def find_date(soup):
+    '''
+    Finds date in HTML code
+    
+    Input:
+      soup: beautiful soup object
+    
+    Output:
+      date
+    '''
     if soup.find('span', class_ = 'date-display-start'):
         start_date = soup.find('span', class_ = 'date-display-start').string
         end_date = soup.find('span', class_ = 'date-display-end').string
-        return [start_date, end_date]
+        return [start_date + ' - ' + end_date]
     elif soup.find('div', id = 'dates'):
         start_end_date = soup.find('div', id = 'dates').find('h3').string
         return start_end_date
@@ -65,6 +86,16 @@ def find_date(soup):
         return start_end_date
 
 def make_exhibit_id(count, museum_id):
+    '''
+    Makes exhibit ID
+    
+    Inputs:
+      count: count of exhibit in the museum
+      museum_id: museum ID
+      
+     Output:
+       string
+    '''
     excount = str(count)
     zeroes = EXHIBIT_LEN - len(excount)
     excount = str(0)*zeroes + excount
@@ -72,5 +103,15 @@ def make_exhibit_id(count, museum_id):
     return ex_id
 
 def make_absolute_url(limiting_domain, relative_url):
+    '''
+    Converts relative URL to absolute URL
+    
+    Inputs:
+      limiting_domain: starting URL
+      relative_url: relative URL to change
+      
+    Output:
+      string
+    '''
     abs_url = limiting_domain + relative_url
     return abs_url

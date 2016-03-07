@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    $(".similars").click(function(){
+    $(".to_reveal").click(function(){
         $(this).next().toggle(500);
     });
 });

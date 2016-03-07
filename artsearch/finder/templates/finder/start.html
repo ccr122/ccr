@@ -27,7 +27,7 @@
 	<input type='submit' Label ='search' value = 'submit'>
 </form>
 
-<div id="results">
+<div>
     {% if result != None %}
         <h2>
                 Results: 
@@ -35,10 +35,10 @@
         <ul>
             {% for url,title, similars in result %}
                <a href={{url}}> <li> {{title}} </li> </a>
-                <button class="similars">Similar Exhibits</button>
+                <button class="to_reveal">Similar Exhibits</button>
                 <ul class="reveal" >
                     {% for s in similars %}
-                    <a href = {{s.0}}> <li> {{s.1}} </li></a>
+                    <a href = {{s.0}}> <li class="sim_ex"> {{s.1}} </li></a>
                     {% endfor %}
                 </ul>
    

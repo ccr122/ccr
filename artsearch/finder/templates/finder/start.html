@@ -35,7 +35,7 @@
         <ul>
             {% for url,title, similars in result %}
                <a href={{url}}> <li> {{title}} </li> </a>
-                <button class="similars" onclick="displaySimilar()">Similar Exhibits</button>
+                <button class="similars">Similar Exhibits</button>
                 <ul class="reveal" >
                     {% for s in similars %}
                     <a href = {{s.0}}> <li> {{s.1}} </li></a>

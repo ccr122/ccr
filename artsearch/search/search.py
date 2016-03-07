@@ -12,7 +12,7 @@ import re
 import numpy as np
 from num2words import num2words
 import csv
-from parse import str_to_dict
+#from parse import str_to_dict
 '''
 This function contains the search object and helper functions for django to call
 
@@ -141,6 +141,36 @@ class Search():
         res.sort(key=lambda x: x[1]) 
         return [r[0] for r in res]
 
+    def get_similar_results(self,ex_id,museums,path_to_searchpy = ''):
+        '''
+        Given exhibit ID and seleced museums, similar_exhibits at those museums
+        '''
+        num_results = NUM_SIMILARS
+        res = self.similar_exhibits(ex_id,museums,num_results)
+        return [ (  get_ex_attribute( r, 'url'  , path_to_searchpy),
+                    get_ex_attribute( r, 'title', path_to_searchpy)  )
+                for r in res ]
+
+    def get_results(self,args,path_to_searchpy = ''):
+        '''
+        Take args and use serach engine
+        '''
+        num_results = NUM_RESULTS
+        key_words  = str_to_dict(args.get('text')) 
+        museums     = args.get('museums')
+        res = self.search(key_words,museums,num_results)
+
+        if len(res) == 0:
+            return [(' ','No results', None )]
+
+        results = []
+        for r in res:
+            u = get_ex_attribute( r, 'url'  , path_to_searchpy)
+            t = get_ex_attribute( r, 'title', path_to_searchpy)
+            s = self.get_similar_results(r, museums,path_to_searchpy)
+            results += [(u,t,s)]
+        return results
+
 #### Helper functions
 
 def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
@@ -157,17 +187,6 @@ def get_ex_attribute(ex_id,attribute,path_to_searchpy=''):
         for row in reader:
             if ex_id == row[0]:
                 return row[1]
-
-
-def get_similar_results(ex_id,museums,path_to_searchpy = ''):
-    '''
-    Given exhibit ID and seleced museums, similar_exhibits at those museums
-    '''
-    num_results = NUM_SIMILARS
-    res = s_o.similar_exhibits(ex_id,museums,num_results)
-    return [ (  get_ex_attribute( r, 'url'  , PATH_to_searchpy),
-                get_ex_attribute( r, 'title', PATH_to_searchpy)  )
-            for r in res ]
 
 ############# Theses guys interact with Django
 
@@ -191,24 +210,13 @@ def get_search_object(path_to_searchpy = '',force = False):
         pickle.dump(S,pik)
     return S
 
-def get_results(args,path_to_searchpy = ''):
-    '''
-    Take args and use serach engine
-    '''
-    num_results = NUM_RESULTS
-    key_words  = str_to_dict(args.get('text')) 
-    museums     = args.get('museums')
-    res = s_o.search(key_words,museums,num_results)
 
-    if len(res) == 0:
-        return [(' ','No results', None )]
-
-    results = []
-    for r in res:
-        u = get_ex_attribute( r, 'url'  , PATH_to_searchpy)
-        t = get_ex_attribute( r, 'title', PATH_to_searchpy)
-        s = get_similar_results(r, museums)
-        results += [(u,t,s)]
-
-    return results
+def str_to_dict(s):
+    words = {}
+    for i in s.split():
+        if i in words:
+            words[i] += 1
+        else:
+            words[i] = 1
+    return words
 

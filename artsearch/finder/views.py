@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django import forms
-from  search.search import *
+from  search.search import make_file_paths, Search, get_search_object
 import os
 parent = os.path.dirname(os.path.dirname(__file__))
 
@@ -34,7 +34,7 @@ def start(request):
 			print ('\n')
 			print (form.cleaned_data)
 			args = form.cleaned_data
-			result = get_results(args,PATH_to_searchpy)
+			result = s_o.get_results(args,PATH_to_searchpy)
 	c = {'form':form, 'result': result}
 	return render(request, 'finder/start.html', c)
 """

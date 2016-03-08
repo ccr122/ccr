@@ -1,6 +1,6 @@
 from num2words import num2words
 import re 
-import en
+#import en
 from nltk.stem.snowball import EnglishStemmer
 
 wordre = "[A-Za-z0-9'-]+"
@@ -51,9 +51,9 @@ def str_to_dict(s):
             w = w[:-1]
         
         if is_num(w):                            # wordify single-word numbers
-            #if len(num2words(int(w)).split(" ")) == 1:
-            #    w = num2words(w)
-            w = num2words(7)
+            if len(num2words(int(w)).split(" ")) == 1:
+                w = num2words(w)
+            #w = num2words(7)
             '''
         elif en.is_noun(w):                  # nouns singular
             plural = en.noun.plural(w)

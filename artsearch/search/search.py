@@ -11,6 +11,7 @@ import os.path
 import re
 import numpy as np
 from num2words import num2words
+from scrapers.parse import str_to_dict
 import csv
 #from parse import str_to_dict
 '''
@@ -223,7 +224,7 @@ def get_search_object(path_to_search_dir = '',force = False):
     print('made it!')
     return S
 
-
+'''
 def str_to_dict(s):
     words = {}
     for i in s.split():
@@ -232,4 +233,4 @@ def str_to_dict(s):
         else:
             words[i] = 1
     return words
-
+'''

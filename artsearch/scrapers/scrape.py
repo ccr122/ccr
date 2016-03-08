@@ -64,7 +64,9 @@ def build_moma(soup, museum_dict, exhibit_id):
 
 def find_desc(soup):
     desc_string = ''
-    if soup.find('meta', attrs = {'name': 'description'}):
+    if soup.find('div', class_ = 'inner-content'):
+        desc_string = soup.find('div', class_ = 'inner-content').get_text()
+    elif soup.find('meta', attrs = {'name': 'description'}):
         desc_string = soup.find('meta', attrs = {'name': 'description'})['content']
     elif soup.find('div', class_ = 'panel-pane pane-custom pane-3'):
         contains_desc = soup.find('div', class_ = 'panel-pane pane-custom pane-3').find_all('p')

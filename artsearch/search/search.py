@@ -28,12 +28,22 @@ def make_file_paths(path_to_search_dir = ''):
     needs path_to_search_dir if imported into another file - like Django's views
     '''
     assert type(path_to_search_dir) == str
+    '''
     FILE_PATHS = {  
                 'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
                 'search_object' : 'pickled_search_object',
                 'title'         : 'csvs/ex_id_to_ex_title.csv',
-                'url'           : 'csvs/ex_id_to_ex_url.csv'
+                'url'           : 'csvs/ex_id_to_ex_url.csv',
+                'date'          : 'csvs/ex_id_to_ex_date.csv'
                 }
+    '''
+    FILE_PATHS = {  
+                'ex_desc_csv'   : 'csvs2/exid_word.csv',
+                'search_object' : 'pickled_search_object',
+                'title'         : 'csvs2/exid_title.csv',
+                'url'           : 'csvs2/exid_url.csv',
+                'date'          : 'csvs2/exid_date.csv'
+                }    
     return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
 
 
@@ -49,7 +59,7 @@ class Search():
         '''
         Run ALL the calculations
         '''
-        exhibits = pd.read_csv(exhibits_file,dtype={'ex_id':str})
+        exhibits = pd.read_csv(exhibits_file,dtype={'ex_id':str},delimiter='|')
         self.words = list(exhibits['word'].unique())
         self.ex_list = list(exhibits['ex_id'].unique())
         self.num_ex  = len(self.ex_list)
@@ -168,7 +178,8 @@ class Search():
             u = get_ex_attribute( r, 'url'  , path_to_search_dir)
             t = get_ex_attribute( r, 'title', path_to_search_dir)
             s = self.get_similar_results(r, museums,path_to_search_dir)
-            results += [(u,t,s)]
+            d = get_ex_attribute( r, 'date' , path_to_search_dir)
+            results += [(u,t,s,d)]
         return results
 
 #### Helper functions
@@ -177,7 +188,7 @@ def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
     '''
     Given ex_id and attribute, returns that exhibit's attribute
     '''
-    assert attribute in ['url','title']
+    assert attribute in ['url','title','date']
     file_paths = make_file_paths(path_to_search_dir)
 
     fp = file_paths[attribute]
@@ -201,13 +212,15 @@ def get_search_object(path_to_search_dir = '',force = False):
         try:
             with open(fp,'r') as pik:
                 S = pickle.load(pik)
+            print('got it!')
             return S
-        except ImportError:
+        except:
             print ( '\timport error')
     print('making pickle and search object')
     with open(fp,'w') as pik:
-        S = Search( path_to_search_dir + file_paths['ex_desc_csv'] )
+        S = Search(file_paths['ex_desc_csv'] )
         pickle.dump(S,pik)
+    print('made it!')
     return S
 
 

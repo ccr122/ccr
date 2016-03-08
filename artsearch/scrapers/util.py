@@ -1,4 +1,4 @@
-import urllib.parse
+import urlparse
 import requests
 import os
 import bs4
@@ -59,13 +59,13 @@ def is_absolute_url(url):
     '''
     if len(url) == 0:
         return False
-    return len(urllib.parse.urlparse(url).netloc) != 0
+    return len(urlparse.urlparse(url).netloc) != 0
 
 
 def remove_fragment(url):
     '''remove the fragment from a url'''
 
-    (url, frag) = urllib.parse.urldefrag(url)
+    (url, frag) = urlparse.urldefrag(url)
     return url
 
 
@@ -96,7 +96,7 @@ def convert_if_relative_url(current_url, new_url):
     if is_absolute_url(new_url):
         return new_url
 
-    parsed_url = urllib.parse.urlparse(new_url)
+    parsed_url = urlparse.urlparse(new_url)
     path_parts = parsed_url.path.split("/")
 
     if len(path_parts) == 0:
@@ -108,7 +108,7 @@ def convert_if_relative_url(current_url, new_url):
     elif new_url[:3] == "www":
         return parsed_url.scheme + new_path
     else:
-        return urllib.parse.urljoin(current_url, new_url)
+        return urlparse.urljoin(current_url, new_url)
 
 
 ARCHIVE_PATH = "/archive/2015/winter/12200-1/new.collegecatalog.uchicago.edu/thecollege/archives"
@@ -147,7 +147,7 @@ def is_url_ok_to_follow(url, limiting_domain):
     if "@" in url:
         return False
 
-    parsed_url =  urllib.parse.urlparse(url)
+    parsed_url =  urlparse.urlparse(url)
     if parsed_url.scheme != "http" and parsed_url.scheme != "https":
         return False
 

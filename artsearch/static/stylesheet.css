@@ -32,19 +32,27 @@ li {
     padding: 5px 0;
 }
 
+.ex_info {
+    display: inline-block;
+}
+
 .ex_title {
-    display: inline;
+    font-weight: 700;
 }
 
 .to_reveal {
-    display: inline;
+    display: inline-block;
     padding-left: 3px;
+    position: absolute;
+    right: 100px;
 }
 
 .reveal {
     display: none;
     font-size: 0.8em;
 }
+
+
 
 button {
     color: black;

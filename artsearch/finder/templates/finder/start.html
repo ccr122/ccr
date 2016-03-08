@@ -34,14 +34,19 @@
         </h2>
         <ul>
             {% for url,title, similars, date in result %}
-               <a href={{url}}> <li> {{title}}, {{date}}</li> </a>
+                <a class="ex_info" href={{url}}>
+                    
+                    <p class="ex_title"> {{title}} </p>
+                    <p> {{date}}</p>
+
+                </a>
                 <button class="to_reveal">Similar Exhibits</button>
                 <ul class="reveal" >
                     {% for s in similars %}
                     <a href = {{s.0}}> <li class="sim_ex"> {{s.1}} </li></a>
                     {% endfor %}
                 </ul>
-   
+                <hr>
             {% endfor %}
         </ul>
     {% endif %}

@@ -79,8 +79,8 @@ class Search():
         term_frequency = float(document.get(term,0.0) )          
         max_frequency_in_doc = float(max(document.values()) )   
         tf = 50.0*(term_frequency/max_frequency_in_doc)  
-        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)
-        idf = np.log( float(self.num_ex)/float(num_rel_docs) ) 
+        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)  #add by 1 to avoid div by 0
+        idf = np.log( (1.0 + self.num_ex)/float(num_rel_docs) )  #add 1 to numerator so we can get log(1)=0 if term in all documents (eg 'the')
         return tf*idf
 
     def vectorize_dict(self,key_words):
@@ -146,7 +146,6 @@ class Search():
             museums = self.museums
         for ex in [x for x in self.ex_list if x[:3] in museums]:
             dist = spatial.distance.cosine(search_vect,self.ex_vects[ex])
-            print(str(ex)+'\t'+str(dist))
             if dist < 1.0:
                 res.append( (ex, dist) ) 
         res.sort(key=lambda x: x[1]) 
@@ -172,7 +171,7 @@ class Search():
         res = self.search(key_words,museums,num_results)
 
         if len(res) == 0:
-            return [(' ','No results', None )]
+            return None
 
         results = []
         for r in res:

@@ -1,5 +1,6 @@
 from num2words import num2words
 import re 
+import json
 #import en
 from nltk.stem.snowball import EnglishStemmer
 
@@ -50,20 +51,22 @@ def str_to_dict(s):
         elif w[-1] == "'":
             w = w[:-1]
         
-        if is_num(w):                            # wordify single-word numbers
-            if len(num2words(int(w)).split(" ")) == 1:
-                w = num2words(w)
+        '''
+        #if is_num(w):                            # wordify single-word numbers
+        #    if len(num2words(int(w)).split(" ")) == 1:
+        #        w = num2words(w)
             #w = num2words(7)
-            '''
+        
         elif en.is_noun(w):                  # nouns singular
             plural = en.noun.plural(w)
             w = en.noun.singular(plural)
         elif is_verb(w):    
             w = en.verb.present(w, person=1)  # verbs 1st-person present
         '''
-        else:
-            w = EnglishStemmer().stem(w)      # stems non-noun/verbs 
-            w = w.encode('ascii','ignore')
+        
+        w = EnglishStemmer().stem(w)      # stems non-noun/verbs 
+        w = w.encode('ascii','ignore')
+        
         if w != '':
             if w not in word_dict:   # build dictionary
                 word_dict[w] = 1
@@ -87,13 +90,13 @@ def build_word_dict(index):
             word_dict[museum_id][ex_id] = str_to_dict(words)
     return word_dict
 
-def create_wordct_csv(word_ct_dict, filename):
+def create_wordct_csv(word_ct_dict):
     '''
     input:  word_ct_dict {word: ct}
             filename for csv output
     save csv as filename --> ex_id|word
     '''
-    with open(filename,'w') as f:
+    with open('exid_word.csv','w') as f:
         line = 'ex_id|word\n'
         f.write(line)
         for museum_id in word_ct_dict:
@@ -119,3 +122,10 @@ def create_attr_csvs(index):
                     line = '{}|{}\n'.format(str(ex_id), \
                         index[museum_id][ex_id][attr].encode('ascii','ignore'))
                     f.write(line)   
+
+def json_to_csvs(index_filename):
+    with open(index_filename,'r') as f:
+        index = json.load(f)
+    wd = build_word_dict(index)
+    create_wordct_csv(wd)
+    create_attr_csvs(index)

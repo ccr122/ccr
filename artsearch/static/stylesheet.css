@@ -9,12 +9,12 @@ a, a:visited {
 }
 
 h1 {
-    font-size: 3em;
+    font-size: 4em;
     font-weight: bold;
 }
 
 h2 {
-    font-size: 1em;
+    font-size: 2em;
 }
 
 form {
@@ -52,7 +52,11 @@ li {
     font-size: 0.8em;
 }
 
+.rule {
+    border-bottom: 1px solid black;
 
+
+}
 
 button {
     color: black;
@@ -62,6 +66,7 @@ button {
     text-align: center;
     font-size: 0.8em;
     border-radius: 5px;
+    margin-top: 11px;
 }
 
 button:hover {

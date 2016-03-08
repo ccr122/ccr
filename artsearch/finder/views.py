@@ -7,7 +7,7 @@ parent = os.path.dirname(os.path.dirname(__file__))
 PATH_to_searchpy = str(os.path.join(parent,'search/'))
 print('\t\t'+PATH_to_searchpy)	
 
-s_o = get_search_object(PATH_to_searchpy,force=True)
+s_o = get_search_object(PATH_to_searchpy,force=False)
 
 
 
@@ -15,7 +15,7 @@ s_o = get_search_object(PATH_to_searchpy,force=True)
 
 MUSEUMS = [	('001', 'Art Institute of Chicago'),
 			('002', 'Museum of Contemporary Art'),
-			('003', 'Metrolitan Museum of Art'),
+			('003', 'Metropolitan Museum of Art'),
 			('004', 'Museum of Modern Art'),
 			('005', 'DeYoung Museum'),
 			('006', 'Legion of Honor')	]
@@ -31,8 +31,6 @@ def start(request):
 	if request.method == 'GET':
 		form = searchform(request.GET)
 		if form.is_valid():
-			print ('\n')
-			print (form.cleaned_data)
 			args = form.cleaned_data
 			result = s_o.get_results(args,PATH_to_searchpy)
 	c = {'form':form, 'result': result}
@@ -44,15 +42,14 @@ class searchform( forms.Form  ):
 	calls other function that'll search tables
 	returns that function's result
 	'''
-	text = forms.CharField(label='Seach description & titles',
-		required=True)
-
-	museums = forms.MultipleChoiceField(
-			choices = MUSEUMS,
-			widget 	= forms.CheckboxSelectMultiple,
-			label  	= 'Select which museums to search from'
+	text = forms.CharField(
+			label='Seach description & titles',
+			required=True,
 		)
 
-
-
-
+	museums = forms.MultipleChoiceField(
+			required 	= False,
+			choices 	= MUSEUMS,
+			widget 		= forms.CheckboxSelectMultiple,
+			label  		= 'tSelect which museums to search from'
+		)

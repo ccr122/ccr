@@ -12,26 +12,36 @@
 <h1> Exhibit search </h1>
 <div id="desc">
 	<p>
-        Search for museum exhibits based with a museum search and a keyword search.
-    </p>
-	<p>
-        Check off the museums you would like to search through, and type in some keywords to search by. Your results will be displayed below.
-    </p>
-    <p>
-        Click "Similar Exhibits" to find the exhibits most similar to that exhibit
+        Search for art exhibits based by museum and key words.
+
+        Check off the museums you would like to search through, and type in what you are looking for. Your results will be displayed below.
     </p>
 </div>
-
 <form>
-	{{form}}
+    <p> 
+        Search:
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        {{form.text}}
+    </p>
+    <p>
+        Museums (defualt all):
+        {{form.museums}}
+    </p>
+
 	<input type='submit' Label ='search' value = 'submit'>
 </form>
 
+{% if result != None %}
 <div>
-    {% if result != None %}
         <h2>
                 Results: 
         </h2>
+
+        <p>
+            Click "Similar Exhibits" to find the exhibits most similar to that exhibit
+        </p>
         <ul>
             {% for url,title, similars, date in result %}
                 <a class="ex_info" href={{url}}>
@@ -46,12 +56,17 @@
                     <a href = {{s.0}}> <li class="sim_ex"> {{s.1}} </li></a>
                     {% endfor %}
                 </ul>
-                <hr>
+                <div class ="rule"></div>
             {% endfor %}
         </ul>
-    {% endif %}
 </div>
-
+{% else %}
+<div>
+    <h2>
+        No results.
+    </h2>
+</div>
+{% endif %}
 
 </body>
 <script type="text/javascript" src={% static "script.js"%}></script>

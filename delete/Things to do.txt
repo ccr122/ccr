@@ -1,0 +1,44 @@
+
+
+Thing to do                                     Person          Status              Notes
+
+Front end:
+    - Make it pretty with css                   Cynthia         in progress    
+    - Hide the similar results with javascript  Cynthia         
+
+Search: 
+    - key_word to dict Parser                   Renee
+
+Web scraping:                                                   DONE
+    - fixing web-scraping... more optimal?      Renee           in progress
+________________________________________________________________________________
+SEARCH / DJANGO INTERACTION
+
+args_from_ui = {
+                    'search_terms'  : 'blah blah blah'
+                    'Museums'       : ['001','002',...]
+                }                                                                  
+        
+results returns [
+                        (result 1 url
+                        result 1 title
+                        [similar exhibits to result 1]  ),
+                        (...),
+                        (...),
+                        ...
+                    ]
+________________________________________________________________________________
+Our new technology:
+    1. Cosine similarity search
+    2. Pandas
+    3. Django
+    4. Pickles
+    
+________________________________________________________________________________
+Other features:
+           
+        Search by dates? <-- low priority 
+            this is quite difficult because we'd have to clean the dates data
+            in the csv which is very irregular atm
+            
+            

@@ -87,8 +87,13 @@ def create_attr_csvs(index):
             f.write(line)
             for museum_id in index:
                 for ex_id in index[museum_id]:
+                    line = str(ex_id) + "|" + index[museum_id[ex_id][attr]
+                    '''
                     line = '{}|{}\n'.format(str(ex_id), \
-                        index[museum_id][ex_id][attr].encode('ascii','ignore'))
+                        # index[museum_id][ex_id][attr].encode('ascii','ignore'))
+                        index[museum_id][ex_id][attr].encode('utf-8'))
+                        # index[museum_id][ex_id][attr])
+                    '''
                     f.write(line)   
     
 if __name__ == "__main__":

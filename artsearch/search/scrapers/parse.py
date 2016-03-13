@@ -87,20 +87,16 @@ def create_attr_csvs(index):
             f.write(line)
             for museum_id in index:
                 for ex_id in index[museum_id]:
-                    line = str(ex_id) + "|" + index[museum_id[ex_id][attr]
-                    '''
                     line = '{}|{}\n'.format(str(ex_id), \
-                        # index[museum_id][ex_id][attr].encode('ascii','ignore'))
                         index[museum_id][ex_id][attr].encode('utf-8'))
-                        # index[museum_id][ex_id][attr])
-                    '''
+                    
                     f.write(line)   
     
 if __name__ == "__main__":
     with open('index4.json','r') as f:
         index = json.load(f)
     #index = scrape.scrape()
-    os.remove('../pickled_search_object')
+   # os.remove('../pickled_search_object')
     wd = build_word_dict(index)
     create_wordct_csv(wd)
     create_attr_csvs(index)

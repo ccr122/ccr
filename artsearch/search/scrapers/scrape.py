@@ -90,7 +90,7 @@ def build_moma(soup, museum_dict, exhibit_id):
         soup: soup for exhibit url we are on 
         museum_dict: dictionary
         exhibit_id: id assigned to this exhibit 
-    outpus:
+    outputs:
         modifies museum_dict
     '''
     title = soup.find('h1', class_="page-header__title").get_text().strip()

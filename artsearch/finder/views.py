@@ -4,28 +4,17 @@ from  search.search import *
 import os
 import csv
 
-
+### get search information
 parent = os.path.dirname(os.path.dirname(__file__))
 PATH_to_searchpy = str(os.path.join(parent,'search/'))
-s_o = get_search_object(PATH_to_searchpy,force=False)
-museum_csv = PATH_to_searchpy+'csvs/musid_name'
-
-with open(museum_csv) as f:
-	r = csv.reader(f):
+museum_csv = PATH_to_searchpy+'csvs/musid_name.csv'
+with open(museum_csv,'r') as f:
+	r = csv.reader(f,delimiter='|')
 	next(r)
 	MUSEUMS = []
 	for row in r:
 		MUSEUMS.append( (row[0],row[1]) )		
-
-'''
-MUSEUMS = [	('001', 'Art Institute of Chicago'),
-			('002', 'Museum of Contemporary Art'),
-			('003', 'Metropolitan Museum of Art'),
-			('004', 'Museum of Modern Art'),
-			('005', 'DeYoung Museum'),
-			('006', 'Legion of Honor')	]
-'''
-
+s_o = get_search_object(PATH_to_searchpy,force = False)
 
 def start(request):
 	'''
@@ -34,14 +23,20 @@ def start(request):
 	shows results
 	'''
 	result = None
-	similar_results = None
 	if request.method == 'GET':				# <-TA said this was good practice
 		form = searchform(request.GET)
 		if form.is_valid():
-			args = form.cleaned_data
+			args   = form.cleaned_data
 			result = s_o.get_results(args,PATH_to_searchpy)
 	c = {'form':form, 'result': result}
 	return render(request, 'finder/start.html', c)
+
+def update(request):
+	'''
+	Go to this page to force search object to update
+	'''
+	s_o = get_search_object(PATH_to_searchpy,force = True)
+	render(request,'finder/updated.html')
 
 class searchform( forms.Form  ):
 	'''
@@ -50,8 +45,8 @@ class searchform( forms.Form  ):
 	returns that function's result
 	'''
 	text = forms.CharField(
-			label='Seach description & titles',
-			required=True,
+			label		= 'Seach description & titles',
+			required	= True,
 		)
 
 	museums = forms.MultipleChoiceField(

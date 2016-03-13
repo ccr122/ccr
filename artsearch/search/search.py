@@ -11,7 +11,6 @@ import os.path
 import re
 import numpy as np
 from scrapers.parse import str_to_dict
-from parse import str_to_dict
 '''
 search object and helper functions
 '''

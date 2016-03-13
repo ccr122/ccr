@@ -1,10 +1,7 @@
-# scrape.py
-
 import requests
 import bs4
 import util
 import re
-import json
 
 def crawl(limiter, exhibit_urls, u, restr):
     '''
@@ -90,7 +87,7 @@ def build_moma(soup, museum_dict, exhibit_id):
         soup: soup for exhibit url we are on 
         museum_dict: dictionary
         exhibit_id: id assigned to this exhibit 
-    outputs:
+    outpus:
         modifies museum_dict
     '''
     title = soup.find('h1', class_="page-header__title").get_text().strip()
@@ -159,18 +156,19 @@ def find_date(soup):
     inputs:
         soup
     outputs:
-        start_end_date: exhibit date as string
+        date: exhibit date as string
     '''
     if soup.find('span', class_ = 'date-display-start'):
         start_date = soup.find('span', class_ = 'date-display-start').string
         end_date = soup.find('span', class_ = 'date-display-end').string
-        start_end_date = start_date + ' - ' + end_date
+        date = start_date + ' - ' + end_date
     elif soup.find('div', id = 'dates'):
-        start_end_date = soup.find('div', id = 'dates').find('h3').string
+        date = soup.find('div', id = 'dates').find('h3').string
+
     elif soup.find('div', id = 'mainTitle'):
-        start_end_date = soup.find('div', id = 'mainTitle').find('p').string
-    
-    return start_end_date
+        date = soup.find('div', id = 'mainTitle').find('p').string
+   
+    return date
 
 # ======================
 
@@ -181,7 +179,7 @@ def build_deyoung(soup, museum_dict,exhibit_id):
         soup: soup for exhibit url we are on 
         museum_dict: dictionary
         exhibit_id: id assigned to this exhibit 
-    outpus:
+    outputs:
         modifies museum_dict
     '''
     title = soup.find('title').get_text().strip()
@@ -199,7 +197,7 @@ def build_legion(soup, museum_dict, exhibit_id):
         soup: soup for exhibit url we are on 
         museum_dict: dictionary
         exhibit_id: id assigned to this exhibit 
-    outpus:
+    outputs:
         modifies museum_dict
     '''
     title = soup.find('title').get_text().strip()
@@ -209,6 +207,34 @@ def build_legion(soup, museum_dict, exhibit_id):
     museum_dict[exhibit_id]['desc'] = find_desc_legion(soup)
 
     museum_dict[exhibit_id]['date'] = find_date(soup)
+
+def build_whitney(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outputs:
+        modifies museum_dict
+    '''
+
+    title = soup.find_all('title')
+    title = title[0].get_text().strip()
+    title = title[:-33]
+    if title == "Human Interest:Portraits from the Whitney’s Collection Apr 27, 2016–Feb 12, 2017":
+        date = title[55:]
+        title = title[:-26]
+    museum_dict[exhibit_id]['title'] = title
+
+    desc = soup.find_all('div',class_="text-module-text text-larger")
+    desc = desc[0].get_text().strip()
+    museum_dict[exhibit_id]['desc'] = desc
+
+    if title != "Human Interest:Portraits from the Whitney’s Collection":
+        date = soup.find_all('div',class_="wrapper")
+        date = date[0].find('h2').get_text().strip()
+    museum_dict[exhibit_id]['date'] = date
 
 scrape_dict = { '001':{ 'name':     'Art Institute of Chicago',
                         'limiter':  "http://www.artic.edu/exhibition",
@@ -252,7 +278,19 @@ scrape_dict = { '001':{ 'name':     'Art Institute of Chicago',
                         'restr':    ['http://legionofhonor.famsf.org/exhibitions/current',
                                     'http://legionofhonor.famsf.org/exhibitions/upcoming',
                                     'http://legionofhonor.famsf.org/exhibitions/archive'],
-                        'info':     build_legion    }   }
+                        'info':     build_legion    },
+                '007':{ 'name':     'Whitney Museum of American Art',
+                        'limiter':  "http://whitney.org/Exhibitions",
+                        'page':     ["http://whitney.org/Exhibitions",
+                                    "http://whitney.org/Exhibitions/Upcoming"],
+                        'restr':    ["http://whitney.org/Exhibitions",
+                                    "http://whitney.org/Exhibitions/Upcoming",
+                                    "http://whitney.org/Exhibitions/Past",
+                                    "http://whitney.org/Exhibitions/Touring",
+                                    "http://whitney.org/Exhibitions/Film",
+                                    "http://whitney.org/Exhibitions/Performance",
+                                    "http://whitney.org/Exhibitions/Artport"],
+                        'info':     build_whitney}}   
 
 def scrape():
     '''
@@ -280,12 +318,13 @@ def scrape():
         for link in exhibit_urls:
             r = requests.get(link)
             soup = bs4.BeautifulSoup(r.text,"html5lib")
+            print(link)
             index[museum_id][exhibit_id] = {}
             scrape_dict[museum_id]['info'](soup, index[museum_id], exhibit_id)
             index[museum_id][exhibit_id]['url'] = link
             exhibit_id = '00' + str(int(exhibit_id) + 1)
 
-        '''
+        
         with open('../csvs/musid_name.csv','w') as f:
             line = 'mus_id|name' + '\n'
             f.write(line)
@@ -293,10 +332,6 @@ def scrape():
                 line = '{}|{}\n'.format(str(mus_id), \
                     scrape_dict[mus_id]['name'])
                 f.write(line) 
-        '''
-
-        with open('index4.json','w') as fp:
-            json.dump(index, fp)
 
     return index
 

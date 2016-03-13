@@ -1,7 +1,7 @@
 import re 
 from nltk.stem.snowball import EnglishStemmer
 import scrape
-
+import os
 import json #####
 
 WORDRE = "[A-Za-z0-9'-]+"
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     with open('index4.json','r') as f:
         index = json.load(f)
     #index = scrape.scrape()
-    
+    os.remove('../pickled_search_object')
     wd = build_word_dict(index)
     create_wordct_csv(wd)
     create_attr_csvs(index)

@@ -1,20 +1,21 @@
 import re 
 from nltk.stem.snowball import EnglishStemmer
+import scrape
 
-import json
+import json #####
 
-wordre = "[A-Za-z0-9'-]+"
+WORDRE = "[A-Za-z0-9'-]+"
 
 def str_to_dict(s):
     '''
+    creates dictionary of words and counts
     input:  s string
     output: dictionary {word: count}
     '''
     s = s.encode('ascii','ignore')
     s = str(s)
     word_dict = {}
-    l = re.findall(wordre, s)
-    print(l)
+    l = re.findall(WORDRE, s)
     for w in l:
         w = w.lower()               # make all letters lowercase 
         
@@ -36,8 +37,9 @@ def str_to_dict(s):
 
 def build_word_dict(index):
     '''
+    adds dictionary of counts each exhibit inside word_dict
     input:  index (the dict passed from scraping)
-    output: word_dict {word: ct}
+    output: word_dict 
     '''
     word_dict = {}
     for museum_id in index:
@@ -72,6 +74,13 @@ ATTR_DICT = {   'title' : '../csvs/exid_title.csv',
                 'url'   : '../csvs/exid_url.csv'   }
 
 def create_attr_csvs(index):
+    '''
+    creates csvs for title, date, url 
+    input:
+        index: dictionary of exhibit information
+    output:
+        writes csv files according to ATTR_DICT
+    '''
     for attr in ATTR_DICT:
         with open(ATTR_DICT[attr],'w') as f:
             line = 'ex_id|' + attr + '\n'
@@ -81,10 +90,12 @@ def create_attr_csvs(index):
                     line = '{}|{}\n'.format(str(ex_id), \
                         index[museum_id][ex_id][attr].encode('ascii','ignore'))
                     f.write(line)   
-
-def json_to_csvs(index_filename):
-    with open(index_filename,'r') as f:
+    
+if __name__ == "__main__":
+    with open('index4.json','r') as f:
         index = json.load(f)
+    #index = scrape.scrape()
+    
     wd = build_word_dict(index)
     create_wordct_csv(wd)
     create_attr_csvs(index)

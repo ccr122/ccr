@@ -1,7 +1,5 @@
 CMSC 122 Final project: Cynthia Mao, Casper Neo, Renee Cai (CCR)
 
-##### what to do with search/test, artsearch/db.sqlite3 ????
-
 This is the README.txt file for Art Search Exhibit.
 
 The following file paths are relative to ccr/artsearch.

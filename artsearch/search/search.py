@@ -1,7 +1,8 @@
 # Search function
 # Takes user keyword search and selected museums (if any) in a dictionary
 # Returns top 5 museum exhibits
-# also builds comparison table from scratch
+# Builds comparison table from scratch
+
 from scipy import spatial
 import itertools
 import pandas as pd
@@ -11,14 +12,9 @@ import os.path
 import re
 import numpy as np
 from scrapers.parse import str_to_dict
-'''
-search object and helper functions
-'''
 
 NUM_SIMILARS    = 5
 NUM_RESULTS     = 10
-
-
 
 class Search():
     '''
@@ -27,10 +23,10 @@ class Search():
         common TF_IDF calculations
         comparison table
     ''' 
-    def __init__(self,exhibits_file):
+    def __init__(self, exhibits_file):
         '''
         Inputs:
-            exhibis file csv ex_id | word
+            exhibits_file: csv mapping exhibit ID to word
         '''
         exhibits = pd.read_csv(exhibits_file,dtype={'ex_id':str},delimiter='|')
         self.words = list(exhibits['word'].unique())
@@ -43,34 +39,34 @@ class Search():
         self.ex_vects = self.vectorize_exhibits(exhibits)
         self.comparison_table = self.build_comparison_table()
     
-    def tf_idf(self,term,document):
+    def tf_idf(self, term, document):
         '''
-        term frequency-inverse document frequency (tf-idf)
-        gives each term in a document an identification score
-            indicating how important it is to identifying document vectors
-        tf measures importance of word to document
-        idf measures rarity of word in corpus
+        Term frequency-inverse document frequency (tf-idf)
+        Gives each term in a document an identification score indicating its importance to identifying document vectors
+        
+        tf measures the importance of a word in a document
+        idf measures the rarity of word within the entire corpus of documents
         '''
         term_frequency = float(document.get(term,0.0) )          
         max_frequency_in_doc = float(max(document.values()) )   
         tf = 50.0*(term_frequency/max_frequency_in_doc)  
-        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)  #add by 1 to avoid div by 0
-        idf = np.log( (1.0 + self.num_ex)/float(num_rel_docs) )  #add 1 to numerator so we can get log(1)=0 if term in all documents (eg 'the')
+        num_rel_docs = 1.0 + self.num_ex_with_word.get(term,0)  # add by 1 to avoid div by 0
+        idf = np.log( (1.0 + self.num_ex)/float(num_rel_docs) )  # add 1 to numerator so we can get log(1)=0 if term in all documents (eg 'the')
         return tf*idf
 
-    def vectorize_dict(self,key_words):
+    def vectorize_dict(self, key_words):
         '''
-        takes a dictionary of key words, turns it into a tfidf adjusted vector
+        Takes a dictionary of key words and turns it into a tf-idf adjusted vector
         '''
         v = []
         for w in self.words:
             v.append(self.tf_idf(w,key_words))
         return v
 
-    def vectorize_exhibits(self,exhibits):
+    def vectorize_exhibits(self, exhibits):
         '''
-        Makes tf_idf adjusted vector for each exhibit
-        data stored in { ex_id : vector }
+        Makes tf-idf adjusted vector for each exhibit
+        Data stored in { ex_id : vector }
         '''
         ex_dics = {}
         for e in self.ex_list:
@@ -94,10 +90,10 @@ class Search():
             comparison[ex2][ex1] = d
         return comparison
     
-    def similar_exhibits(self,ex_id,museums,num_results):
+    def similar_exhibits(self, ex_id, museums, num_results):
         '''
-        return exhibits from given museums
-        sorted by cosine similarity
+        Return exhibits from given museums
+        Sorted by cosine similarity
         '''
         if len(museums) == 0:
             museums = self.museums
@@ -106,13 +102,14 @@ class Search():
         res.sort(key = lambda x:x[1])
         return [r[0] for r in res][1:min(len(res),num_results+1)]
         
-    def search(self,key_words,museums):
+    def search(self, key_words, museums):
         '''
         Inputs:
-            key_words from search queery - {word:word count}
-            museums -   [museums to search from]
-        outputs:
-            closest exhibits from your museums of choice
+            key_words from search query: {word: word count}
+            museums: [museums to search from]
+        
+        Outputs:
+            Most similar exhibits with respect to your museums of choice
         '''
         search_vect = self.vectorize_dict(key_words)
         res     = []
@@ -127,7 +124,7 @@ class Search():
 
     def get_similar_results(self,ex_id,museums,path_to_search_dir = ''):
         '''
-        Given exhibit ID and seleced museums, similar_exhibits at those museums
+        Given exhibit ID and seleced museums, returns similar_exhibits at those museums
         '''
         res = self.similar_exhibits(ex_id, museums, NUM_SIMILARS)
         return [ (  get_ex_attribute( r, 'url'  , path_to_search_dir),
@@ -136,7 +133,7 @@ class Search():
 
     def get_results(self,args,path_to_search_dir = ''):
         '''
-        Take args and use serach engine
+        Takes args and uses serach engine
         '''
         num_results = NUM_RESULTS
         key_words  = str_to_dict(args.get('text')) 
@@ -159,8 +156,8 @@ class Search():
 
 def make_file_paths(path_to_search_dir = ''):
     '''
-    dict to relevant urls
-    needs path_to_search_dir if imported into another file - like Django's views
+    Dict to relevant urls
+    Needs path_to_search_dir if imported into another file (like Django's views)
     '''
     assert type(path_to_search_dir) == str
     FILE_PATHS = {  
@@ -172,11 +169,11 @@ def make_file_paths(path_to_search_dir = ''):
                 }    
     return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
 
+
 def get_search_object(path_to_search_dir = '',force = False):
     '''
-    by default gets seach object from a pickle,
-    if that fails or if force =True
-    then generate a new of search object
+    By default gets seach object from a pickle. If that fails or if force = True,
+    then generates a new of search object
     '''
     file_paths = make_file_paths(path_to_search_dir)
     fp = file_paths['search_object']
@@ -195,6 +192,7 @@ def get_search_object(path_to_search_dir = '',force = False):
         pickle.dump(S,pik)
     print('made it!')
     return S
+
 
 def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
     '''

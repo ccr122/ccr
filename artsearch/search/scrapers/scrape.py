@@ -1,48 +1,79 @@
-# scrape_new_moma.py
+# scrape.py
 
 import requests
 import bs4
 import util
 import re
+import json
 
 def crawl(limiter, exhibit_urls, u, restr):
+    '''
+    crawls u and adds qualifying links to exhibit_urls 
+    inputs:
+        limiter: url stem that we want the exhibit links to start with
+        exhibit_urls: list that we are adding links to
+        u: the page we are crawling
+        restr: restricted pages that we don't want to add to exhibit_urls
+    outputs:
+        modifies exhibit_urls
+    '''
     if  (limiter in u) and (u not in exhibit_urls) and \
         (u not in restr) and (restricted_string not in u):
         exhibit_urls += [u]
-        print(u)
 
 restricted_string = "http://www.artic.edu/exhibitions?qt-media_feed"
 
 def build_artic(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('title').get_text().strip()
     title = title[:-31]
     museum_dict[exhibit_id]['title'] = title 
 
-    desc = soup.find('div',class_='field-item even', property="content:encoded").get_text().strip()
+    desc = soup.find('div',class_='field-item even', 
+           property="content:encoded").get_text().strip()
     museum_dict[exhibit_id]['desc'] = desc
 
     date = soup.find('div',class_ = "field-item even").get_text().strip()
     museum_dict[exhibit_id]['date'] = date
 
 def build_mca(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('title').get_text().strip()
     title = title[6:]
     museum_dict[exhibit_id]['title'] = title 
 
     desc = soup.find('div', class_="bg_white").get_text().strip()
     museum_dict[exhibit_id]['desc'] = desc
-
-    '''
-    date = soup.find('p', class_='dates').string
-    date = soup.find_all('p', class_='dates')
-    date = date[0].get_text().strip()
-    print(date)
+    
+    date = soup.find('p',class_="dates").get_text().strip()
     museum_dict[exhibit_id]['date'] = date
-    '''
-
-    museum_dict[exhibit_id]['date'] = 'COME SEE IT'
 
 def build_new(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('h3', style='color: #fff;').get_text().strip()
     museum_dict[exhibit_id]['title'] = title
 
@@ -53,32 +84,83 @@ def build_new(soup, museum_dict, exhibit_id):
     museum_dict[exhibit_id]['date'] = date
                    
 def build_moma(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('h1', class_="page-header__title").get_text().strip()
     museum_dict[exhibit_id]['title'] = title
 
     desc = soup.find('div', class_="mde-column__section").get_text().strip()
     museum_dict[exhibit_id]['desc'] = desc
 
-    date = soup.find('h2', class_="page-header__subheading--narrow").get_text().strip()
+    date = soup.find('h2', 
+           class_="page-header__subheading--narrow").get_text().strip()
     museum_dict[exhibit_id]['date'] = date
 
-def find_desc(soup):
+# ======================
+# FINDERS
+
+def find_desc_legion(soup):
+    '''
+    finds description in the soup for Legion of Honor's exhibit pages
+    inputs:
+        soup
+    outputs:
+        desc_string: exhibit description as string
+    '''
     desc_string = ''
-    if soup.find('div', class_ = 'inner-content'):
-        desc_string = soup.find('div', class_ = 'inner-content').get_text()
-    elif soup.find('meta', attrs = {'name': 'description'}):
-        desc_string = soup.find('meta', attrs = {'name': 'description'})['content']
-    elif soup.find('div', class_ = 'panel-pane pane-custom pane-3'):
-        contains_desc = soup.find('div', class_ = 'panel-pane pane-custom pane-3').find_all('p')
-     #   desc_string = ''
+    if soup.find('div', class_= 'panel-pane pane-custom pane-4').find_all('p'):
+        contains_desc = soup.find('div', 
+                        class_= 'panel-pane pane-custom pane-4').find_all('p')
         for d in contains_desc:
             if d.get_text():
                 desc_string += d.get_text()
             else:
                 break
+    elif soup.find_all('div', class_ = 'field-item even'):
+        contains_desc = soup.find_all('div', class_ = 'field-item even')
+        desc_string = contains_desc[4].get_text()
+    
+    return desc_string
+
+def find_desc_deyoung(soup):
+    '''
+    finds description in the soup for de Young's exhibit pages
+    inputs:
+        soup
+    outputs:
+        desc_string: exhibit description as string
+    '''
+    desc_string = ''
+    if soup.find('div', class_="inner-content"):
+        desc_string = soup.find('div', class_='inner-content').get_text()
+    elif soup.find('div', class_ = 'panel-pane pane-custom pane-3'):
+        contains_desc = soup.find('div', 
+                        class_ = 'panel-pane pane-custom pane-3').find_all('p')
+        for d in contains_desc:
+            if d.get_text():
+                desc_string += d.get_text()
+            else:
+                break
+    elif soup.find_all('div',class_='field-item even'):
+        contains_desc=soup.find_all('div', class_='field-item even')
+        desc_string = contains_desc[4].get_text()
     return desc_string
 
 def find_date(soup):
+    '''
+    finds date in the soup for the exhibit page
+    inputs:
+        soup
+    outputs:
+        start_end_date: exhibit date as string
+    '''
     if soup.find('span', class_ = 'date-display-start'):
         start_date = soup.find('span', class_ = 'date-display-start').string
         end_date = soup.find('span', class_ = 'date-display-end').string
@@ -90,21 +172,41 @@ def find_date(soup):
     
     return start_end_date
 
+# ======================
+
 def build_deyoung(soup, museum_dict,exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('title').get_text().strip()
     title = title[:-11]
     museum_dict[exhibit_id]['title'] = title
 
-    museum_dict[exhibit_id]['desc'] = find_desc(soup)
+    museum_dict[exhibit_id]['desc'] = find_desc_deyoung(soup)
 
     museum_dict[exhibit_id]['date'] = find_date(soup)
 
 def build_legion(soup, museum_dict, exhibit_id):
+    '''
+    pulls information from html soup
+    inputs:
+        soup: soup for exhibit url we are on 
+        museum_dict: dictionary
+        exhibit_id: id assigned to this exhibit 
+    outpus:
+        modifies museum_dict
+    '''
     title = soup.find('title').get_text().strip()
     title = title[:-18]
     museum_dict[exhibit_id]['title'] = title
 
-    museum_dict[exhibit_id]['desc'] = find_desc(soup)
+    museum_dict[exhibit_id]['desc'] = find_desc_legion(soup)
 
     museum_dict[exhibit_id]['date'] = find_date(soup)
 
@@ -115,22 +217,27 @@ scrape_dict = { '001':{ 'name':     'Art Institute of Chicago',
                                     'http://www.artic.edu/exhibitions/current',
                                     'http://www.artic.edu/exhibitions/upcoming',
                                     'http://www.artic.edu/exhibitions/past'],
-                        'info':     build_artic },
-                '002':{ 'limiter':  'https://mcachicago.org/Exhibitions',
+                        'info':     build_artic }, 
+                '002':{ 'name':     'Museum of Contemporary Art',
+                        'limiter':  'https://mcachicago.org/Exhibitions',
                         'page':     ['https://mcachicago.org/Exhibitions'],
                         'restr':    ['https://mcachicago.org/Exhibitions/Series',
-                                    'https://mcachicago.org/Exhibitions'],
+                                    'https://mcachicago.org/Exhibitions', 
+                                    'https://mcachicago.org/Exhibitions/Artists-In-Residence'],
                         'info':     build_mca   },
-                '003':{  'limiter':  "http://www.newmuseum.org/exhibitions/view/",
+                '003':{ 'name':     'New Museum',
+                        'limiter':  "http://www.newmuseum.org/exhibitions/view/",
                         'page':     ["http://www.newmuseum.org/exhibitions/current",
                                     "http://www.newmuseum.org/exhibitions/upcoming"],
                         'restr':    [],
                         'info':     build_new   },
-                '004':{ 'limiter':  'http://www.moma.org/calendar/exhibitions/',
+                '004':{ 'name':     'Museum of Modern Art',
+                        'limiter':  'http://www.moma.org/calendar/exhibitions/',
                         'page':     ['http://www.moma.org/calendar/exhibitions'],
                         'restr':    [],
                         'info':     build_moma  },
-                '005':{ 'limiter':  'http://deyoung.famsf.org/exhibitions/',
+                '005':{ 'name':     'de Young Museum',
+                        'limiter':  'http://deyoung.famsf.org/exhibitions/',
                         'page':     ['http://deyoung.famsf.org/exhibitions/current',
                                     'http://deyoung.famsf.org/exhibitions/upcoming'],
                         'restr':    ['http://deyoung.famsf.org/exhibitions/current',
@@ -138,7 +245,8 @@ scrape_dict = { '001':{ 'name':     'Art Institute of Chicago',
                                     'http://deyoung.famsf.org/exhibitions/upcoming',
                                     'http://deyoung.famsf.org/exhibitions/archive'],
                         'info':     build_deyoung   },
-                '006':{ 'limiter':  'http://legionofhonor.famsf.org/exhibitions/',
+                '006':{ 'name':     'Legion of Honor',
+                        'limiter':  'http://legionofhonor.famsf.org/exhibitions/',
                         'page':     ['http://legionofhonor.famsf.org/exhibitions/current',
                                     'http://legionofhonor.famsf.org/exhibitions/upcoming'],
                         'restr':    ['http://legionofhonor.famsf.org/exhibitions/current',
@@ -147,6 +255,11 @@ scrape_dict = { '001':{ 'name':     'Art Institute of Chicago',
                         'info':     build_legion    }   }
 
 def scrape():
+    '''
+    performs entire scraping function
+    outputs:
+        index: dictionary of museum/exhibit information 
+    '''
     index = {}
     for museum_id in scrape_dict:
         limiter = scrape_dict[museum_id]['limiter']
@@ -171,6 +284,20 @@ def scrape():
             scrape_dict[museum_id]['info'](soup, index[museum_id], exhibit_id)
             index[museum_id][exhibit_id]['url'] = link
             exhibit_id = '00' + str(int(exhibit_id) + 1)
-    
+
+        '''
+        with open('../csvs/musid_name.csv','w') as f:
+            line = 'mus_id|name' + '\n'
+            f.write(line)
+            for mus_id in scrape_dict:
+                line = '{}|{}\n'.format(str(mus_id), \
+                    scrape_dict[mus_id]['name'])
+                f.write(line) 
+        '''
+
+        with open('index4.json','w') as fp:
+            json.dump(index, fp)
+
     return index
+
 

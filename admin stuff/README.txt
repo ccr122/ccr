@@ -2,30 +2,8 @@ CMSC 122 Final project: Cynthia Mao, Casper Neo, Renee Cai (CCR)
 
 This is the README.txt file for Art Search Exhibit.
 
-the following file paths are relative to ccr/artsearch
 
-_____ Over all Structure _______________________________________________________
-
-search/scrapers/scrape.py:
-    Holds functions that scrape website, including main crawler scrape()
-    and helper functions build_...() tailored to each website's html soup
-
-search/scrapers/parse.py:
-    Calls scrape to get information, saves information to search/csvs
-    
-search/csvs:
-    this directory is where our csv files live
-    
-search/search.py:
-    Reads CSVs to make search object, also reads csvs to get additional information
-    search object gets saved as a pickle as retrieval is faster than generation
-    
-finder/views.py:
-    Django made this file. We added code to pull search object from memory
-    it interacts with the user and uses the search object to generate results
-
-
-_____ Running application _______________________________________________________
+###   How to run, with already-made CSV:
 
 1) Make sure you have the following packages installed:
     bs4
@@ -53,7 +31,7 @@ _____ Running application ______________________________________________________
     
 5) Use search engine, according to usage instructions on webpage.
 
-_____ Document code ownership __________________________________________________
+###   Document code ownership (file paths are relative from ccr/artsearch):
 
 - Direct copy:
     search/scrapers/util.py     (from instructor code)

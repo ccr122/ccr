@@ -18,12 +18,11 @@ s_o = get_search_object(PATH_to_searchpy,force = False)
 
 def start(request):
 	'''
-	Our main (only) page. Takes request
-	checks if there is a form filled
-	shows results
+	Our main (only) page
+	Takes request, checks if there is a form filled, and shows results
 	'''
 	result = None
-	if request.method == 'GET':				# <-TA said this was good practice
+	if request.method == 'GET':
 		form = searchform(request.GET)
 		if form.is_valid():
 			args   = form.cleaned_data
@@ -41,8 +40,8 @@ def update(request):
 class searchform( forms.Form  ):
 	'''
 	Takes the form, builds dictionary of args
-	calls other function that'll search tables
-	returns that function's result
+	Calls other function that will search tables
+	Returns that function's result
 	'''
 	text = forms.CharField(
 			label		= 'Seach description & titles',

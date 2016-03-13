@@ -2,7 +2,6 @@ import re
 from nltk.stem.snowball import EnglishStemmer
 import scrape
 import os
-import json #####
 
 WORDRE = "[A-Za-z0-9'-]+"
 
@@ -57,14 +56,14 @@ def create_wordct_csv(word_ct_dict):
             filename for csv output
     save csv as filename --> ex_id|word
     '''
-    with open('exid_word.csv','w') as f:
+    with open('../csvs/exid_word.csv','w') as f:
         line = 'ex_id|word\n'
         f.write(line)
         for museum_id in word_ct_dict:
             for ex_id in word_ct_dict[museum_id]:
                 for word in word_ct_dict[museum_id][ex_id]:
                     ct = 0
-                    while ct < word_ct_dict[museum_id][ex_id][word]:        # check this! 
+                    while ct < word_ct_dict[museum_id][ex_id][word]:         
                         line = '{}|{}\n'.format(str(ex_id), str(word))
                         f.write(line)
                         ct += 1
@@ -93,9 +92,7 @@ def create_attr_csvs(index):
                     f.write(line)   
     
 if __name__ == "__main__":
-    with open('index4.json','r') as f:
-        index = json.load(f)
-    #index = scrape.scrape()
+    index = scrape.scrape()
     if os.path.isfile('../pickled_search_object'):
         os.remove('../pickled_search_object')
     wd = build_word_dict(index)

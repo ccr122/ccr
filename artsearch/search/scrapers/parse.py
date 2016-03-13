@@ -96,7 +96,8 @@ if __name__ == "__main__":
     with open('index4.json','r') as f:
         index = json.load(f)
     #index = scrape.scrape()
-   # os.remove('../pickled_search_object')
+    if os.path.isfile('../pickled_search_object'):
+        os.remove('../pickled_search_object')
     wd = build_word_dict(index)
     create_wordct_csv(wd)
     create_attr_csvs(index)

@@ -10,55 +10,28 @@ import pickle
 import os.path
 import re
 import numpy as np
-from num2words import num2words
 from scrapers.parse import str_to_dict
-import csv
-#from parse import str_to_dict
+from parse import str_to_dict
 '''
-This function contains the search object and helper functions for django to call
-
+search object and helper functions
 '''
 
 NUM_SIMILARS    = 5
 NUM_RESULTS     = 10
 
 
-def make_file_paths(path_to_search_dir = ''):
-    '''
-    dict to relevant urls
-    needs path_to_search_dir if imported into another file - like Django's views
-    '''
-    assert type(path_to_search_dir) == str
-    '''
-    FILE_PATHS = {  
-                'ex_desc_csv'   : 'csvs/ex_id_to_ex_desc_parsed.csv',
-                'search_object' : 'pickled_search_object',
-                'title'         : 'csvs/ex_id_to_ex_title.csv',
-                'url'           : 'csvs/ex_id_to_ex_url.csv',
-                'date'          : 'csvs/ex_id_to_ex_date.csv'
-                }
-    '''
-    FILE_PATHS = {  
-                'ex_desc_csv'   : 'csvs2/exid_word.csv',
-                'search_object' : 'pickled_search_object',
-                'title'         : 'csvs2/exid_title.csv',
-                'url'           : 'csvs2/exid_url.csv',
-                'date'          : 'csvs2/exid_date.csv'
-                }    
-    return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
-
-
 
 class Search():
     '''
-    This object is here to make and then hold
-    a lot of commonly cited calculations for later use
-    with regards to cosine similarity document searches anyway
-    It gets pickled
+    This object generates and holds everything needed for search:
+        document vectors, for each exhibit
+        common TF_IDF calculations
+        comparison table
     ''' 
     def __init__(self,exhibits_file):
         '''
-        Run ALL the calculations
+        Inputs:
+            exhibis file csv ex_id | word
         '''
         exhibits = pd.read_csv(exhibits_file,dtype={'ex_id':str},delimiter='|')
         self.words = list(exhibits['word'].unique())
@@ -74,7 +47,10 @@ class Search():
     def tf_idf(self,term,document):
         '''
         term frequency-inverse document frequency (tf-idf)
-        this normalizes a given word so rarer words are worth more
+        gives each term in a document an identification score
+            indicating how important it is to identifying document vectors
+        tf measures importance of word to document
+        idf measures rarity of word in corpus
         '''
         term_frequency = float(document.get(term,0.0) )          
         max_frequency_in_doc = float(max(document.values()) )   
@@ -131,14 +107,13 @@ class Search():
         res.sort(key = lambda x:x[1])
         return [r[0] for r in res][1:min(len(res),num_results+1)]
         
-    def search(self,key_words,museums, num_results):
+    def search(self,key_words,museums):
         '''
         Inputs:
             key_words from search queery - {word:word count}
             museums -   [museums to search from]
-            num_results
         outputs:
-            closest num_result museums from your museums of choice
+            closest exhibits from your museums of choice
         '''
         search_vect = self.vectorize_dict(key_words)
         res     = []
@@ -155,8 +130,7 @@ class Search():
         '''
         Given exhibit ID and seleced museums, similar_exhibits at those museums
         '''
-        num_results = NUM_SIMILARS
-        res = self.similar_exhibits(ex_id,museums,num_results)
+        res = self.similar_exhibits(ex_id, museums, NUM_SIMILARS)
         return [ (  get_ex_attribute( r, 'url'  , path_to_search_dir),
                     get_ex_attribute( r, 'title', path_to_search_dir)  )
                 for r in res ]
@@ -168,7 +142,7 @@ class Search():
         num_results = NUM_RESULTS
         key_words  = str_to_dict(args.get('text')) 
         museums     = args.get('museums')
-        res = self.search(key_words,museums,num_results)
+        res = self.search(key_words,museums)
 
         if len(res) == 0:
             return None
@@ -177,33 +151,33 @@ class Search():
         for r in res:
             u = get_ex_attribute( r, 'url'  , path_to_search_dir)
             t = get_ex_attribute( r, 'title', path_to_search_dir)
-            s = self.get_similar_results(r, museums,path_to_search_dir)
+            s = self.get_similar_results(r , museums, path_to_search_dir)
             d = get_ex_attribute( r, 'date' , path_to_search_dir)
             results += [(u,t,s,d)]
         return results
 
 #### Helper functions
 
-def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
+def make_file_paths(path_to_search_dir = ''):
     '''
-    Given ex_id and attribute, returns that exhibit's attribute
+    dict to relevant urls
+    needs path_to_search_dir if imported into another file - like Django's views
     '''
-    assert attribute in ['url','title','date']
-    file_paths = make_file_paths(path_to_search_dir)
-
-    fp = file_paths[attribute]
-    with open( fp ) as f:
-        reader = csv.reader(f, delimiter='|')
-        next(reader)
-        for row in reader:
-            if ex_id == row[0]:
-                return row[1]
-
-############# Theses guys interact with Django
+    assert type(path_to_search_dir) == str
+    FILE_PATHS = {  
+                'ex_desc_csv'   : 'csvs/exid_word.csv',
+                'search_object' : 'pickled_search_object',
+                'title'         : 'csvs/exid_title.csv',
+                'url'           : 'csvs/exid_url.csv',
+                'date'          : 'csvs/exid_date.csv'
+                }    
+    return {  k : path_to_search_dir + v for k,v in FILE_PATHS.items() }
 
 def get_search_object(path_to_search_dir = '',force = False):
     '''
-    checks if it is saved, builds if it is not
+    by default gets seach object from a pickle,
+    if that fails or if force =True
+    then generate a new of search object
     '''
     file_paths = make_file_paths(path_to_search_dir)
     fp = file_paths['search_object']
@@ -215,21 +189,24 @@ def get_search_object(path_to_search_dir = '',force = False):
             print('got it!')
             return S
         except:
-            print ( '\timport error')
-    print('making pickle and search object')
+            print ( '\t error loading pickle')
+    print('making new search object and pickle')
     with open(fp,'w') as pik:
         S = Search(file_paths['ex_desc_csv'] )
         pickle.dump(S,pik)
     print('made it!')
     return S
 
-'''
-def str_to_dict(s):
-    words = {}
-    for i in s.split():
-        if i in words:
-            words[i] += 1
-        else:
-            words[i] = 1
-    return words
-'''
+def get_ex_attribute(ex_id,attribute,path_to_search_dir=''):
+    '''
+    Given ex_id and attribute, returns that exhibit's attribute
+    '''
+    assert attribute in ['url','title','date']
+    file_paths = make_file_paths(path_to_search_dir)
+    fp = file_paths[attribute]
+    with open( fp ) as f:
+        reader = csv.reader(f, delimiter='|')
+        next(reader)
+        for row in reader:
+            if ex_id == row[0]:
+                return row[1]

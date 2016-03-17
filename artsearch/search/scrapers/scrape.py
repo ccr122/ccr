@@ -190,6 +190,7 @@ def build_deyoung(soup, museum_dict,exhibit_id):
 
     museum_dict[exhibit_id]['date'] = find_date(soup)
 
+
 def build_legion(soup, museum_dict, exhibit_id):
     '''
     pulls information from html soup
@@ -222,7 +223,7 @@ def build_whitney(soup, museum_dict, exhibit_id):
     title = soup.find_all('title')
     title = title[0].get_text().strip()
     title = title[:-33]
-    if title == "Human Interest:Portraits from the Whitney’s Collection Apr 27, 2016–Feb 12, 2017":
+    if title == "Human Interest:Portraits from the Whitney's Collection Apr 27, 2016-Feb 12, 2017":
         date = title[55:]
         title = title[:-26]
     museum_dict[exhibit_id]['title'] = title
@@ -231,7 +232,7 @@ def build_whitney(soup, museum_dict, exhibit_id):
     desc = desc[0].get_text().strip()
     museum_dict[exhibit_id]['desc'] = desc
 
-    if title != "Human Interest:Portraits from the Whitney’s Collection":
+    if title != "Human Interest:Portraits from the Whitney's Collection":
         date = soup.find_all('div',class_="wrapper")
         date = date[0].find('h2').get_text().strip()
     museum_dict[exhibit_id]['date'] = date

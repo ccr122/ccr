@@ -320,10 +320,13 @@ def scrape():
             r = requests.get(link)
             soup = bs4.BeautifulSoup(r.text,"html5lib")
             print(link)
-            index[museum_id][exhibit_id] = {}
-            scrape_dict[museum_id]['info'](soup, index[museum_id], exhibit_id)
-            index[museum_id][exhibit_id]['url'] = link
-            exhibit_id = '00' + str(int(exhibit_id) + 1)
+            try:
+                index[museum_id][exhibit_id] = {}
+                scrape_dict[museum_id]['info'](soup, index[museum_id], exhibit_id)
+                index[museum_id][exhibit_id]['url'] = link
+                exhibit_id = '00' + str(int(exhibit_id) + 1)
+            except:
+                print('\t^^ Scraper Failed')
 
         
         with open('../csvs/musid_name.csv','w') as f:

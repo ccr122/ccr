@@ -33,17 +33,20 @@ _____ Running application ______________________________________________________
 
 1) Make sure you have the following packages installed:
     bs4
-    csv
-    itertools
+    django
     nltk
     numpy
-    os
     pandas
-    pickle
-    re
     requests
     scipy
 
+We also use the following preinstalled packages:
+    csv
+    itertools
+    os
+    pickle
+    re
+    
 2) If would like to remake CSV files, type the following in ccr/artsearch/search/scrapers:
     python parse.py
     
